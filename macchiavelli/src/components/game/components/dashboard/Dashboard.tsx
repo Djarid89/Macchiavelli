@@ -1,9 +1,17 @@
 import React, { Component } from 'react';
+import { IPlayer } from '../player/Player';
 
-export class DashBoard extends Component {
-  render() {
-    return(
-      <p>Hello DashBoard.</p>
-    )
-  }
+interface Props {
+  players: IPlayer[];
+}
+
+export const DashBoard: React.FC<Props> = ({ players }: Props) => {
+  return (
+    <>
+
+      {
+        players.map((player: IPlayer) => <div>{player.name}</div>)
+      }
+    </>
+  );
 }
