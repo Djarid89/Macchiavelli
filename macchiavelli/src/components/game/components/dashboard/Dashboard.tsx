@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { IPlayer } from '../player/Player';
+import styles from './Dashboard.module.scss';
 
 interface Props {
   players: IPlayer[];
@@ -8,10 +9,11 @@ interface Props {
 export const DashBoard: React.FC<Props> = ({ players }: Props) => {
   return (
     <>
-
-      {
-        players.map((player: IPlayer) => <div>{player.name}</div>)
-      }
+      <div className={styles.dashboard}>
+        <div className={styles.dashboardHeader}>
+          { players.map((player: IPlayer) => <span>{player.name}</span>) }
+        </div>
+      </div>
     </>
   );
 }
