@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 
-export class Combo extends Component {
+export class Combinations extends Component {
   render() {
     return(
-      <p>Hello Combo.</p>
+      <p>Hello Combinations.</p>
     )
   }
 }
