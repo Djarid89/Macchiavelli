@@ -1,5 +1,6 @@
 import React, { Component, useState } from 'react';
 import { IPlayer } from '../player/Player';
+import styles from './GameHandlerer.module.scss';
 
 interface Props {
   setGameStarting(value: boolean): void;
@@ -17,18 +18,19 @@ export const GameHandlerer: React.FC<Props> = ({ setGameStarting, setPlayers }: 
 
   return(
     <>
-      <p>Hello GameHandlerer.</p>
-      <div>Players:</div>
-      { playerAdded.map((p: IPlayer, index: number) => <div key={index}>{p.name}</div>) }
-      <div><input type="text" onChange={ (event: React.ChangeEvent<HTMLInputElement>) => setPlayer({ name: event.target.value }) } value={ player.name }/></div>
-      <div><button onClick={ () => addPlayer(player) }>Add</button></div>
-      <div>
-        <button onClick={
-          () => {
-            setPlayers(playerAdded);
-            setGameStarting(true);
-          }
-        }>Gioca</button>
+      <div className={ styles.gameHandlerer }>
+        <div>Players:</div>
+        { playerAdded.map((p: IPlayer, index: number) => <div key={index}>{p.name}</div>) }
+        <div><input type="text" onChange={ (event: React.ChangeEvent<HTMLInputElement>) => setPlayer({ name: event.target.value }) } value={ player.name }/></div>
+        <div><button onClick={ () => addPlayer(player) }>Add</button></div>
+        <div>
+          <button onClick={
+            () => {
+              setPlayers(playerAdded);
+              setGameStarting(true);
+            }
+          }>Gioca</button>
+        </div>
       </div>
     </>
   )

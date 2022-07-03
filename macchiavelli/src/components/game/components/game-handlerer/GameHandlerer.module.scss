@@ -1,0 +1,9 @@
+@use '../../Game.module.scss';
+
+.gameHandlerer {
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  height: calc(100vh - $padding * 2);
+  width: calc(100vw - $padding * 2);
+}
