@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { IPlayer } from './components/cards/interfaces/Card';
 import { Deck } from './components/deck/Deck';
 import styles from './Dashboard.module.scss';

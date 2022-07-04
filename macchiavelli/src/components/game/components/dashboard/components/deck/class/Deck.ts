@@ -1,20 +1,37 @@
 import { CCard } from "../../card/class/Card";
-import { Seed } from "../../cards/interfaces/Card";
 
 export class CDeck {
-  cards: CCard[];
+  cards: CCard[] = [];
 
   constructor() {
-    this.cards = [];
-    const seeds = [
-      { seed: Seed.Hearts, occurrence: 0 },
-      { seed: Seed.Tiles, occurrence: 0 },
-      { seed: Seed.Clovers, occurrence: 0 },
-      { seed: Seed.Pikes, occurrence: 0 }
-    ];
-    for(let index = 0; index < 104; index++) {
-      let randomSeed = seeds[Math.floor(Math.random() * 3)];
+    this.setCards();
+    this.mixDecksCards();
+  }
 
+  setCards(): CCard[] {
+    this.cards = [];
+    for(let number = 1; number <= 13; number++) {
+      for(let seed = 0; seed < 4; seed++) {
+        this.cards = this.cards.concat([new CCard(number, seed), new CCard(number, seed)]);
+      }
+    }
+    return this.cards;
+  }
+
+  getCard(): CCard | undefined {
+    if(!this.cards.length) {
+      this.setCards();
+    }
+    return this.cards.pop();
+  }
+
+  mixDecksCards(): void {
+    let currentIndex = this.cards.length
+    let randomIndex: number;
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      [this.cards[currentIndex], this.cards[randomIndex]] = [this.cards[randomIndex], this.cards[currentIndex]];
     }
   }
 }
