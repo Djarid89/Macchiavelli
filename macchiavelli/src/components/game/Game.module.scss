@@ -2,4 +2,6 @@ $padding: 16px;
 
 .game {
   padding: $padding;
+  height: calc(100vh - $padding * 2);
+  width: calc(100vw - $padding * 2);
 }
