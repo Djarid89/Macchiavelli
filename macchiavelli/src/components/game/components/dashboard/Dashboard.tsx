@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Hand } from '../Hand/Hand';
+import { CCard } from './components/card/class/Card';
 import { IPlayer } from './components/cards/interfaces/Card';
 import { Deck } from './components/deck/Deck';
 import styles from './Dashboard.module.scss';
@@ -8,6 +10,8 @@ interface Props {
 }
 
 export const DashBoard: React.FC<Props> = ({ players }: Props) => {
+  const [cards, setCards] = useState<CCard[]>([]);
+
   return (
     <>
       <div className={styles.dashboard}>
@@ -17,11 +21,11 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
         <div className={styles.dashboardContainer}>
           asd
           <span className={styles.deckContainer}>
-            <Deck></Deck>
+            <Deck setCards={ setCards } addCard={ (cardToAdd: CCard) => { setCards(cards.concat([cardToAdd])) } }></Deck>
           </span>
         </div>
         <div className={styles.dashboardFooter}>
-          asd
+          <Hand cards={cards}></Hand>
         </div>
       </div>
     </>

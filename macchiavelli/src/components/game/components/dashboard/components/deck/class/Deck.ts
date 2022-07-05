@@ -18,14 +18,25 @@ export class CDeck {
     return this.cards;
   }
 
-  getCard(): CCard | undefined {
+  getCard(): CCard {
     if(!this.cards.length) {
       this.setCards();
     }
-    return this.cards.pop();
+    return this.cards.pop() as CCard;
   }
 
-  mixDecksCards(): void {
+  getCards(cardsNumber?: number): CCard[] {
+    const cards: CCard[] = [];
+    for(let i = 0; i < (cardsNumber || 12); i++) {
+      const card = this.cards.pop();
+      if(card) {
+        cards.push(card);
+      }
+    }
+    return cards;
+  }
+
+  private mixDecksCards(): void {
     let currentIndex = this.cards.length
     let randomIndex: number;
     while (currentIndex !== 0) {
