@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IPlayer } from '../dashboard/components/cards/interfaces/Card';
+import { IPlayer } from '../dashboard/components/combinations/interfaces/Combinations';
 import styles from './GameHandlerer.module.scss';
 
 interface Props {

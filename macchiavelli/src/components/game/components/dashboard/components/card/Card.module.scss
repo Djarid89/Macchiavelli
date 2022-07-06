@@ -2,5 +2,15 @@
   width: 100px;
   height: 125px;
   border: 1px solid black;
-  margin-right: 6px;
+  margin-right: -30px;
+  background-color: white;  // remove when images comes
+
+  &.selected {
+    border: 2px solid blue;
+    transform: translateY(-30px);
+  }
+
+  &.ready {
+    border-color: green;
+  }
 }
