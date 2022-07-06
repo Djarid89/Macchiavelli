@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IPlayer } from './components/dashboard/components/cards/interfaces/Card';
+import { IPlayer } from './components/dashboard/components/combinations/interfaces/Combinations';
 import { DashBoard } from './components/dashboard/Dashboard';
 import { GameHandlerer } from './components/game-handlerer/GameHandlerer';
 import styles from './Game.module.scss';

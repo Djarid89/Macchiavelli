@@ -1,30 +1,58 @@
 import React from 'react';
-import { Seed } from '../cards/interfaces/Card';
 import styles from './Card.module.scss';
+import { CCard } from './class/Card';
 
 interface Props {
-  number: number;
-  seed: Seed;
+  card: CCard;
   index: number;
-  setSwipeFrom(toIndex: number): void;
-  doSwipe(fromIndex: number): void;
+  setSwipeFrom?(toIndex: number): void;
+  doSwipe?(fromIndex: number): void;
+  combine?(card: CCard): void;
+  throwDown?(): void;
 }
 
-export const Card: React.FC<Props> = ({ number, seed, index, setSwipeFrom, doSwipe }: Props) => {
-  const stopEventStopPropagation = (e: any): void => {
-    e.stopPropagation();
-    e.preventDefault();
+export const Card: React.FC<Props> = ({ card, index, setSwipeFrom, doSwipe, combine, throwDown }: Props) => {
+  const stopEventStopPropagation = (event: any): void => {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  const handleSetSwipeFrom = (value: number) => {
+    if(setSwipeFrom) {
+      setSwipeFrom(value);
+    }
+  }
+
+  const handleDoSwipe = (value: number) => {
+    if(doSwipe) {
+      doSwipe(value);
+    }
+  }
+
+  const handleCombine = () => {
+    if(combine) {
+      combine(card);
+    }
+  }
+
+  const handleThrowDown = () => {
+    if(card.ready && throwDown) {
+      throwDown();
+    }
   }
 
   return (
     <>
-      <span className={ styles.card } 
+      <span className={ `${styles.card} ${card.selected ? styles.selected : ''} ${card.ready ? styles.ready : ''}` }
+            style={{ zIndex: index }}
             draggable
-            onDragStart={ () => setSwipeFrom(index) }
+            onDragStart={ () => handleSetSwipeFrom(index) }
             onDragOver={ stopEventStopPropagation }
-            onDrop={ () => doSwipe(index) }>
-        <div>{ number }</div>
-        <div>{ seed }</div>
+            onDrop={ () => handleDoSwipe(index) }
+            onClick={ () => handleCombine() }
+            onDoubleClick={ handleThrowDown }>
+        <div>{ card.number }</div>
+        <div>{ card.seed }</div>
       </span>
     </>
   );

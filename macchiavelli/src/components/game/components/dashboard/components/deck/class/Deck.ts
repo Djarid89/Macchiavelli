@@ -10,9 +10,11 @@ export class CDeck {
 
   setCards(): CCard[] {
     this.cards = [];
+    let cardId = 1;
     for(let number = 1; number <= 13; number++) {
       for(let seed = 0; seed < 4; seed++) {
-        this.cards = this.cards.concat([new CCard(number, seed), new CCard(number, seed)]);
+        this.cards = this.cards.concat([new CCard(cardId, number, seed), new CCard(cardId + 1, number, seed)]);
+        cardId += 2;
       }
     }
     return this.cards;
