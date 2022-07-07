@@ -1,8 +1,10 @@
+$width: 100px;
+
 .card {
-  width: 100px;
+  width: $width;
   height: 125px;
   border: 1px solid black;
-  margin-right: -30px;
+  margin-right: calc(($width * -1) + 20px);
   background-color: white;  // remove when images comes
 
   &.selected {

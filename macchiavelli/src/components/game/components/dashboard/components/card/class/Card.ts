@@ -7,11 +7,11 @@ export class CCard {
   selected: boolean;
   ready: boolean;
 
-  constructor(id: number, number: number, seed: Seed) {
+  constructor(id: number, number: number, seed: Seed, selected = false, ready = false) {
     this.id = id;
     this.number = number;
     this.seed = seed
-    this.selected = false;
-    this.ready = false;
+    this.selected = selected;
+    this.ready = ready;
   }
 }

@@ -5,39 +5,44 @@ import { CCard } from './class/Card';
 interface Props {
   card: CCard;
   index: number;
-  setSwipeFrom?(toIndex: number): void;
-  doSwipe?(fromIndex: number): void;
+  moveFrom?(toIndex: number): void;
+  doMove?(fromIndex: number): void;
+  setCardToAttach?(card: CCard): void;
+  attachCard?(): void;
   combine?(card: CCard): void;
   throwDown?(): void;
 }
 
-export const Card: React.FC<Props> = ({ card, index, setSwipeFrom, doSwipe, combine, throwDown }: Props) => {
-  const stopEventStopPropagation = (event: any): void => {
+export const Card: React.FC<Props> = ({ card, index, moveFrom, setCardToAttach, doMove, attachCard, combine, throwDown }: Props) => {
+  const handleOnDragOver = (event: any): void => {
     event.stopPropagation();
     event.preventDefault();
   }
 
-  const handleSetSwipeFrom = (value: number) => {
-    if(setSwipeFrom) {
-      setSwipeFrom(value);
+  const handleDragStart = () => {
+    if(moveFrom) {
+      moveFrom(index);
+    } 
+    if(setCardToAttach) {
+      setCardToAttach(card);
     }
   }
 
-  const handleDoSwipe = (value: number) => {
-    if(doSwipe) {
-      doSwipe(value);
+  const handleOnDrop = () => {
+    if(doMove) {
+      doMove(index);
+    } else if(attachCard) {
+      attachCard();
     }
   }
 
-  const handleCombine = () => {
-    if(combine) {
+  const handleClick = (e: any) => {
+    if(e.ctrlKey) {
+      if(card.ready && throwDown) {
+        throwDown();
+      }
+    } else if(combine) {
       combine(card);
-    }
-  }
-
-  const handleThrowDown = () => {
-    if(card.ready && throwDown) {
-      throwDown();
     }
   }
 
@@ -46,11 +51,10 @@ export const Card: React.FC<Props> = ({ card, index, setSwipeFrom, doSwipe, comb
       <span className={ `${styles.card} ${card.selected ? styles.selected : ''} ${card.ready ? styles.ready : ''}` }
             style={{ zIndex: index }}
             draggable
-            onDragStart={ () => handleSetSwipeFrom(index) }
-            onDragOver={ stopEventStopPropagation }
-            onDrop={ () => handleDoSwipe(index) }
-            onClick={ () => handleCombine() }
-            onDoubleClick={ handleThrowDown }>
+            onDragStart={ handleDragStart }
+            onDragOver={ handleOnDragOver }
+            onDrop={ handleOnDrop }
+            onClick={ (e: any) => handleClick(e) }>
         <div>{ card.number }</div>
         <div>{ card.seed }</div>
       </span>
