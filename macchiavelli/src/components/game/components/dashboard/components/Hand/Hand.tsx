@@ -12,14 +12,16 @@ interface Props {
 
 export const Hand: React.FC<Props> = ({ combinationId, cards, setCards, setCombinations }: Props) => {
   const [combination, setCombination] = useState<CCombinations>(new CCombinations(combinationId, []));
-  let swipeFrom: number;
+  let from: number;
 
-  const setSwipeFrom = (indexFrom: number): void => {
-    swipeFrom = indexFrom;
+  const moveFrom = (indexFrom: number): void => {
+    from = indexFrom;
   }
 
-  const doSwipe = (swipeTo: number): void => {
-    [cards[swipeFrom], cards[swipeTo]] = [cards[swipeTo], cards[swipeFrom]];
+  const doMove = (swipeTo: number): void => {
+    const cardToMove = new CCard(cards[from].id, cards[from].number, cards[from].seed, cards[from].selected, cards[from].ready);
+    cards.splice(from, 1);
+    cards.splice(swipeTo, 0, cardToMove);
     setCards(cards.map((card: CCard) => card));
   }
 
@@ -49,13 +51,13 @@ export const Hand: React.FC<Props> = ({ combinationId, cards, setCards, setCombi
 
   return (
     <>
-      {
+        {
         cards.map((card: CCard, index: number) =>
-          <Card key={ index }
+          <Card key={ index + 1 }
                 card={ card }
                 index={ index }
-                setSwipeFrom={ (toIndex: number) => setSwipeFrom(toIndex) }
-                doSwipe={ (fromIndex: number) => doSwipe(fromIndex) }
+                moveFrom={ moveFrom }
+                doMove={ doMove }
                 combine={ handleCombine }
                 throwDown={ handleThrowDown }></Card>
         )

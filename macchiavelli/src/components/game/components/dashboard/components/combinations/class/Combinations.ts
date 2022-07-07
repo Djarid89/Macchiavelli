@@ -35,6 +35,11 @@ export class CCombinations {
   }
 
   orderCards(): void {
+    const isSameSeed = this.cards?.every((c: CCard) => c.seed === this.cards[0].seed) || false;
+    if(!isSameSeed) {
+      return;
+    }
+
     const one = this.cards.find((card: CCard) => card.number === 1);
     if(one) {
       this.cards.splice(this.cards.findIndex((card: CCard) => card.number === 1), 1);

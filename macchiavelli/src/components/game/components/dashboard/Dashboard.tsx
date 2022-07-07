@@ -32,7 +32,12 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
           </span>
         </div>
         <div className={ styles.dashboardFooter }>
-          <Hand cards={ cards } combinationId={ 0 } setCards={ setCards } setCombinations={ handleSetCombinations }></Hand>
+          <div className={ styles.dashboardHand }>
+            <Hand cards={ cards } combinationId={ 0 } setCards={ setCards } setCombinations={ handleSetCombinations }></Hand>
+          </div>
+          <div className={ styles.dashboardButton }>
+            <button>Passo</button>
+          </div>
         </div>
       </div>
     </>
