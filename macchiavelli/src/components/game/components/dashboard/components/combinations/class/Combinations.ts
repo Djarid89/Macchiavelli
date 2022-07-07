@@ -1,6 +1,6 @@
 import { CCard } from "../../card/class/Card";
 
-export class CCombinations {
+export class Combination {
   id: number;
   cards: CCard[];
 

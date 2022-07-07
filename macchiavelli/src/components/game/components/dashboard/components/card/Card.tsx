@@ -7,25 +7,32 @@ interface Props {
   index: number;
   moveFrom?(toIndex: number): void;
   doMove?(fromIndex: number): void;
+  setCardToAttach?(card: CCard): void;
+  attachCard?(): void;
   combine?(card: CCard): void;
   throwDown?(): void;
 }
 
-export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, combine, throwDown }: Props) => {
+export const Card: React.FC<Props> = ({ card, index, moveFrom, setCardToAttach, doMove, attachCard, combine, throwDown }: Props) => {
   const handleOnDragOver = (event: any): void => {
     event.stopPropagation();
     event.preventDefault();
   }
 
-  const handleSetSwipeFrom = () => {
+  const handleDragStart = () => {
     if(moveFrom) {
       moveFrom(index);
+    } 
+    if(setCardToAttach) {
+      setCardToAttach(card);
     }
   }
 
-  const handleDoSwipe = () => {
+  const handleOnDrop = () => {
     if(doMove) {
       doMove(index);
+    } else if(attachCard) {
+      attachCard();
     }
   }
 
@@ -44,9 +51,9 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, combine, 
       <span className={ `${styles.card} ${card.selected ? styles.selected : ''} ${card.ready ? styles.ready : ''}` }
             style={{ zIndex: index }}
             draggable
-            onDragStart={ handleSetSwipeFrom }
+            onDragStart={ handleDragStart }
             onDragOver={ handleOnDragOver }
-            onDrop={ handleDoSwipe }
+            onDrop={ handleOnDrop }
             onClick={ (e: any) => handleClick(e) }>
         <div>{ card.number }</div>
         <div>{ card.seed }</div>
