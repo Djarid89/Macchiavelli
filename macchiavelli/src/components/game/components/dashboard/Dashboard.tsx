@@ -24,16 +24,12 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
       if(toRemove) {
         toRemove.removeSelectedAndReady();
         combCards = combination.cards.filter((c: CCard) => c.id !== toRemove.id);
-        setCombination(new Combination(combCards));
       }
+      setCombination(new Combination(combCards));
     } else {
-      if(combinationToCheck?.isCardRemovable() === false) {
-        setCombination(new Combination(combCards));
-      } else {
-        card.selected = true;
-        combCards = combination.cards.concat([new CCard(card.id, card.number, card.seed, card.selected, card.ready)]);
-        setCombination(new Combination(combCards));
-      }
+      card.selected = true;
+      combCards = combination.cards.concat([new CCard(card.id, card.number, card.seed, card.selected, card.ready)]);
+      setCombination(new Combination(combCards));
     }
   }
 
@@ -47,14 +43,16 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     setCombinations(combinations.concat([combination]));
     setCards(cards.filter((card: CCard) => !card.selected));
     combinations.forEach((comb: Combination) => comb.cards = comb.cards.filter((card: CCard) => !combination.cards.some((c: CCard) => c.id === card.id)));
+    combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
     setCombination(new Combination([]));
   }
 
   const handleAttachCombination = (combinationToAttach: Combination): void => {
-    if(!combination.isAllCombinable(combination.cards.concat(combinationToAttach.cards || []))) {
+    if(isSomeCombUnusable(combinationToAttach)) {
       return;
     }
-    combination.cards.forEach((card: CCard) => combinationToAttach.cards = combinationToAttach.orderCards(combinationToAttach.cards.concat([card])));
+    combination.cards.forEach((card: CCard) => combinationToAttach.cards = combinationToAttach.cards.concat([card]));
+    combinationToAttach.cards = combinationToAttach.orderCards(combinationToAttach.cards);
     combinations.forEach((comb: Combination) => {
       if(comb.id !== combinationToAttach.id) {
         comb.cards = comb.cards.filter((card: CCard) => !card.selected);
@@ -63,6 +61,16 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     setCombinations(combinations.filter((comb: Combination) => comb.cards.length));
     setCards(cards.filter((card: CCard) => !card.selected));
     setCombination(new Combination([]));
+  }
+
+  const isSomeCombUnusable = (combinationToAttach: Combination): boolean => {
+    for(const comb of combinations) {
+      const cardFiltered = comb.cards.filter((card: CCard) => !card.selected);
+      if(cardFiltered.length !== 0 && cardFiltered.length < 3) {
+        return true;
+      }
+    }
+    return !combination.isAllCombinable(combination.cards.concat(combinationToAttach.cards || []));
   }
 
   return (

@@ -17,16 +17,6 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
     combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
   }
 
-  const handleCombine = (card: CCard, combination: Combination) => {
-    combine(card, combination);
-    if(combination.isAllCombinable(combination.cards)) {
-      const selectedCardsNumber = combination.cards.reduce((sum: number, c: CCard) => c.selected ? sum + 1 : sum, 0);
-      combination.cards.forEach((c: CCard) => c.ready = c.selected && combination.cards.length - selectedCardsNumber >= 3);
-    } else {
-      combination.cards.forEach((c: CCard) => c.ready = false);
-    }
-  }
-
   return (
     <>
       {
@@ -40,7 +30,7 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
                           card={ card }
                           index={ index }
                           attachCombination={ () => handleAttachCombination(combination) }
-                          combine={ (c: CCard) => handleCombine(c, combination) }
+                          combine={ (c: CCard) => combine(c, combination) }
                           throwDown={ throwDown }></Card>)
                 }
               </span>

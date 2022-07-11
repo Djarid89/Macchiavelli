@@ -65,10 +65,10 @@ export class Combination {
     return !maxReached && ((highest < 13 && card.number === highest + 1) || (highest === 13 && card.number === 1));
   }
 
-  isCardRemovable(): boolean {
-    const numberOfCardsSelected = this.cards.reduce((sum: number, card: CCard) => card.selected ? sum + 1 : sum, 0);
-    return this.cards.length - numberOfCardsSelected > 3;
-  }
+  // isCardRemovable(): boolean {
+  //   const numberOfCardsSelected = this.cards.reduce((sum: number, card: CCard) => card.selected ? sum + 1 : sum, 0);
+  //   return this.cards.length - numberOfCardsSelected > 3;
+  // }
 
   isAllCombinable(cards: CCard[]): boolean {
     if(cards.length < 3) {
