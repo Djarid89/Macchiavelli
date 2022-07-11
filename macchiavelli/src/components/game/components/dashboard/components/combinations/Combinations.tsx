@@ -6,21 +6,24 @@ import styles from './Combinations.module.scss';
 
 interface Props {
   combinations: Combination[];
-  cardToAttach: CCard | undefined;
-  removeCardFromHand(card: CCard): void;
+  attachCombination(combination: Combination): void;
+  combine(card: CCard, combination: Combination): void
+  throwDown(): void;
 }
 
-export const Combinations: React.FC<Props> = ({ combinations, cardToAttach, removeCardFromHand: setCards }: Props) => {
-  const handleAttachCard = (combination: Combination): void => {
-    if(!cardToAttach) {
-      return;
-    }
+export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine, throwDown }: Props) => {
+  const handleAttachCombination = (combination: Combination): void => {
+    combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
+    attachCombination(combination);
+  }
 
-    if(combination.isCardCombinable(cardToAttach)) {
-      combination.cards = combination.cards.concat([cardToAttach]);
-      combination.orderCards();
-      setCards(cardToAttach);
-      cardToAttach = undefined;
+  const handleCombine = (card: CCard, combination: Combination) => {
+    combine(card, combination);
+    if(combination.isAllCombinable(combination.cards)) {
+      const selectedCardsNumber = combination.cards.reduce((sum: number, c: CCard) => c.selected ? sum + 1 : sum, 0);
+      combination.cards.forEach((c: CCard) => c.ready = c.selected && combination.cards.length - selectedCardsNumber >= 3);
+    } else {
+      combination.cards.forEach((c: CCard) => c.ready = false);
     }
   }
 
@@ -36,7 +39,9 @@ export const Combinations: React.FC<Props> = ({ combinations, cardToAttach, remo
                     <Card key={ index2 }
                           card={ card }
                           index={ index }
-                          attachCard={ () => handleAttachCard(combination) }></Card>)
+                          attachCombination={ () => handleAttachCombination(combination) }
+                          combine={ (c: CCard) => handleCombine(c, combination) }
+                          throwDown={ throwDown }></Card>)
                 }
               </span>
             )

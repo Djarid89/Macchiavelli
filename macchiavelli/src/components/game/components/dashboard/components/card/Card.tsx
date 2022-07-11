@@ -7,13 +7,12 @@ interface Props {
   index: number;
   moveFrom?(toIndex: number): void;
   doMove?(fromIndex: number): void;
-  setCardToAttach?(card: CCard): void;
-  attachCard?(): void;
+  attachCombination?(): void;
   combine?(card: CCard): void;
   throwDown?(): void;
 }
 
-export const Card: React.FC<Props> = ({ card, index, moveFrom, setCardToAttach, doMove, attachCard, combine, throwDown }: Props) => {
+export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCombination, combine, throwDown }: Props) => {
   const handleOnDragOver = (event: any): void => {
     event.stopPropagation();
     event.preventDefault();
@@ -22,23 +21,23 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, setCardToAttach, 
   const handleDragStart = () => {
     if(moveFrom) {
       moveFrom(index);
-    } 
-    if(setCardToAttach) {
-      setCardToAttach(card);
+    }
+    if(combine && !card.selected) {
+      combine(card);
     }
   }
 
   const handleOnDrop = () => {
     if(doMove) {
       doMove(index);
-    } else if(attachCard) {
-      attachCard();
+    } else if(attachCombination) {
+      attachCombination();
     }
   }
 
   const handleClick = (e: any) => {
     if(e.ctrlKey) {
-      if(card.ready && throwDown) {
+      if(throwDown) {
         throwDown();
       }
     } else if(combine) {

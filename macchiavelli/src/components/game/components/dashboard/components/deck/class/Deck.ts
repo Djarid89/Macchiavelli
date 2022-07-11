@@ -5,7 +5,7 @@ export class CDeck {
 
   constructor() {
     this.setCards();
-    this.mixDecksCards();
+    // this.mixDecksCards();
   }
 
   setCards(): CCard[] {
@@ -17,6 +17,9 @@ export class CDeck {
         cardId += 2;
       }
     }
+    // this.cards.push(new CCard(1, 10, 0));
+    // this.cards.push(new CCard(2, 11, 0));
+    // this.cards.push(new CCard(3, 12, 0));
     return this.cards;
   }
 

@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from '../card/Card';
 import { CCard } from '../card/class/Card';
 import { Combination } from '../combinations/class/Combinations';
 
 interface Props {
-  combinationId: number;
   cards: CCard[];
   setCards(cards: CCard[]): void;
-  setCombinations(combination: Combination): void;
-  setCardToAttach(cards: CCard): void;
+  combine(card: CCard): void;
+  throwDown(): void
 }
 
-export const Hand: React.FC<Props> = ({ combinationId, cards, setCards, setCombinations, setCardToAttach }: Props) => {
-  const [combination, setCombination] = useState<Combination>(new Combination(combinationId, []));
+export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: Props) => {
   let from: number;
 
   const moveFrom = (indexFrom: number): void => {
@@ -27,27 +25,13 @@ export const Hand: React.FC<Props> = ({ combinationId, cards, setCards, setCombi
   }
 
   const handleCombine = (card: CCard): void => {
-    if(card.selected) {
-      const toRemove = combination.cards.find((c: CCard) => c.id === card.id);
-      if(toRemove) {
-        card.selected = false;
-        setCombination(new Combination(combinationId, combination.cards.filter((c: CCard) => c.id !== toRemove.id)));
-      }
-    } else if(combination.isCardCombinable(card)) {
-      card.selected = true;
-      setCombination(new Combination(combinationId, combination.cards.concat([card])));
+    combine(card);
+    const selectedCards = cards.filter((card: CCard) => card.selected);
+    if(new Combination(selectedCards).isAllCombinable(selectedCards)) {
+      cards.forEach((c: CCard) => c.ready = c.selected);
+    } else {
+      cards.forEach((c: CCard) => c.ready = false);
     }
-  }
-
-  const handleThrowDown = (): void => {
-    combination.cards.forEach((c: CCard) => {
-      c.selected = false;
-      c.ready = false;
-    });
-    setCards(cards.filter((c: CCard) => !combination.cards.find((cardCombination: CCard) => cardCombination.id === c.id)));
-    combination.orderCards();
-    setCombinations(combination);
-    setCombination(new Combination(combinationId, []));
   }
 
   return (
@@ -58,10 +42,9 @@ export const Hand: React.FC<Props> = ({ combinationId, cards, setCards, setCombi
                 card={ card }
                 index={ index }
                 moveFrom={ moveFrom }
-                setCardToAttach = { setCardToAttach }
                 doMove={ doMove }
-                combine={ handleCombine }
-                throwDown={ handleThrowDown }></Card>
+                combine={ (c: CCard) => handleCombine(c) }
+                throwDown={ throwDown }></Card>
         )
       }
     </>
