@@ -12,7 +12,7 @@ export class Combination {
 
   isCardCombinable(card: CCard, cards?: CCard[]): boolean {
     const cardsToCheck = cards || this.cards;
-    if(cardsToCheck.length) {
+    if(!cardsToCheck.length) {
       return true;
     }
 
@@ -77,7 +77,7 @@ export class Combination {
     const orderedCards: CCard[] = this.orderCards(cards.map((card: CCard) => card));
     const incrementaCards: CCard[] = [];
     for(const card of orderedCards) {
-      if(!card.selected || (incrementaCards.length && !this.isCardCombinable(card, incrementaCards))) {
+      if(incrementaCards.length && !this.isCardCombinable(card, incrementaCards)) {
         return false;
       }
       incrementaCards.push(card);

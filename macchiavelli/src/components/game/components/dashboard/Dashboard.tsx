@@ -17,12 +17,9 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
   const [combinations, setCombinations] = useState<Combination[]>([]);
 
   const handleCombine = (card: CCard, combinationToCheck?: Combination): void => {
-    let combCards: CCard[] = [];
+    let combCards: CCard[] = combination.cards;
     if(card.selected) {
       card.selected = false;
-      if(combinationToCheck?.isCardRemovable() === false) {
-        return;
-      }
       const toRemove = combination.cards.find((c: CCard) => c.id === card.id);
       if(toRemove) {
         toRemove.removeSelectedAndReady();
@@ -30,31 +27,41 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
         setCombination(new Combination(combCards));
       }
     } else {
-      card.selected = true;
-      combCards = combination.cards.concat([new CCard(card.id, card.number, card.seed, card.selected, card.ready)]);
-      setCombination(new Combination(combCards));
+      if(combinationToCheck?.isCardRemovable() === false) {
+        setCombination(new Combination(combCards));
+      } else {
+        card.selected = true;
+        combCards = combination.cards.concat([new CCard(card.id, card.number, card.seed, card.selected, card.ready)]);
+        setCombination(new Combination(combCards));
+      }
     }
   }
 
   const handleThrowDown = (): void => {
+    if(!combination.isAllCombinable(combination.cards)) {
+      return;
+    }
     combination.cards = combination.orderCards(combination.cards);
     combination.id = combinations.length + 1;
     combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
-    // Ready reset
-    setCards(cards.filter((card: CCard) => !card.selected));
-    combinations.forEach((comb: Combination) => comb.cards.forEach((card: CCard) => card.removeSelectedAndReady()));
     setCombinations(combinations.concat([combination]));
+    setCards(cards.filter((card: CCard) => !card.selected));
+    combinations.forEach((comb: Combination) => comb.cards = comb.cards.filter((card: CCard) => !combination.cards.some((c: CCard) => c.id === card.id)));
     setCombination(new Combination([]));
   }
 
   const handleAttachCombination = (combinationToAttach: Combination): void => {
-    combination.cards.forEach((card: CCard) => {
-      if(combinationToAttach.isCardCombinable(card)) {
-        combinationToAttach.cards = combinationToAttach.orderCards(combinationToAttach.cards.concat([card]));
+    if(!combination.isAllCombinable(combination.cards.concat(combinationToAttach.cards || []))) {
+      return;
+    }
+    combination.cards.forEach((card: CCard) => combinationToAttach.cards = combinationToAttach.orderCards(combinationToAttach.cards.concat([card])));
+    combinations.forEach((comb: Combination) => {
+      if(comb.id !== combinationToAttach.id) {
+        comb.cards = comb.cards.filter((card: CCard) => !card.selected);
       }
-    })
+    });
+    setCombinations(combinations.filter((comb: Combination) => comb.cards.length));
     setCards(cards.filter((card: CCard) => !card.selected));
-    combinations.forEach((comb: Combination) => comb.cards.forEach((card: CCard) => card.removeSelectedAndReady()));
     setCombination(new Combination([]));
   }
 

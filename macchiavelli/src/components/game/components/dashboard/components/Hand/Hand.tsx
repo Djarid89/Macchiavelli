@@ -26,7 +26,7 @@ export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: P
 
   const handleCombine = (card: CCard): void => {
     combine(card);
-    const selectedCards = cards.filter((card: CCard) => card.selected);
+    const selectedCards = cards.filter((c: CCard) => c.selected);
     if(new Combination(selectedCards).isAllCombinable(selectedCards)) {
       cards.forEach((c: CCard) => c.ready = c.selected);
     } else {

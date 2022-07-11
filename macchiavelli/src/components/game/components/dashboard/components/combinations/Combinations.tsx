@@ -13,8 +13,8 @@ interface Props {
 
 export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine, throwDown }: Props) => {
   const handleAttachCombination = (combination: Combination): void => {
-    combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
     attachCombination(combination);
+    combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
   }
 
   const handleCombine = (card: CCard, combination: Combination) => {

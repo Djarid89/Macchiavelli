@@ -12,8 +12,8 @@ export class CDeck {
     this.cards = [];
     let cardId = 1;
     for(let number = 1; number <= 13; number++) {
-      for(let seed = 0; seed < 4; seed++) {
-        this.cards = this.cards.concat([new CCard(cardId, number, seed), new CCard(cardId + 1, number, seed)]);
+      for(let seed = 0; seed < 1; seed++) {
+        this.cards = this.cards.concat([new CCard(cardId, number, seed)]); // , new CCard(cardId + 1, number, seed)
         cardId += 2;
       }
     }
@@ -32,7 +32,7 @@ export class CDeck {
 
   getCards(cardsNumber?: number): CCard[] {
     const cards: CCard[] = [];
-    for(let i = 0; i < (cardsNumber || 12); i++) {
+    for(let i = 0; i < (cardsNumber || 52); i++) {
       const card = this.cards.pop();
       if(card) {
         cards.push(card);
