@@ -5,21 +5,18 @@ export class CDeck {
 
   constructor() {
     this.setCards();
-    // this.mixDecksCards();
+    this.mixDecksCards();
   }
 
   setCards(): CCard[] {
     this.cards = [];
     let cardId = 1;
     for(let number = 1; number <= 13; number++) {
-      for(let seed = 0; seed < 1; seed++) {
-        this.cards = this.cards.concat([new CCard(cardId, number, seed)]); // , new CCard(cardId + 1, number, seed)
+      for(let seed = 0; seed < 4; seed++) {
+        this.cards = this.cards.concat([new CCard(cardId, number, seed), new CCard(cardId + 1, number, seed)]);
         cardId += 2;
       }
     }
-    // this.cards.push(new CCard(1, 10, 0));
-    // this.cards.push(new CCard(2, 11, 0));
-    // this.cards.push(new CCard(3, 12, 0));
     return this.cards;
   }
 

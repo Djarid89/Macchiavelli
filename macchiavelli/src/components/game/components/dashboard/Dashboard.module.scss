@@ -23,7 +23,7 @@
 
   .dashboardFooter {
     display: grid;
-    grid-template-columns: auto min-content;
+    grid-template-columns: min-content auto min-content;
     gap: 30px;
 
     .dashboardHand {
@@ -31,7 +31,8 @@
       align-items: flex-end;
     }
 
-    .dashboardButton {
+    .dashboardButtonPass,
+    .dashboardButtonOrder {
       display: flex;
       justify-content: center;
       align-items: center;

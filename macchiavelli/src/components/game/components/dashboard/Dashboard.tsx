@@ -48,7 +48,7 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
   }
 
   const handleAttachCombination = (combinationToAttach: Combination): void => {
-    if(isSomeCombUnusable(combinationToAttach)) {
+    if(!combination.isAllCombinable(combination.cards.concat(combinationToAttach.cards || []))) {
       return;
     }
     combination.cards.forEach((card: CCard) => combinationToAttach.cards = combinationToAttach.cards.concat([card]));
@@ -63,14 +63,9 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     setCombination(new Combination([]));
   }
 
-  const isSomeCombUnusable = (combinationToAttach: Combination): boolean => {
-    for(const comb of combinations) {
-      const cardFiltered = comb.cards.filter((card: CCard) => !card.selected);
-      if(cardFiltered.length !== 0 && cardFiltered.length < 3) {
-        return true;
-      }
-    }
-    return !combination.isAllCombinable(combination.cards.concat(combinationToAttach.cards || []));
+  const handleOrderCard = (): void => {
+    cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
+    setCards(cards.map((card: CCard) => card));
   }
 
   return (
@@ -89,13 +84,16 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
           </span>
         </div>
         <div className={ styles.dashboardFooter }>
+          <div className={ styles.dashboardButtonOrder }>
+            <button onClick={ handleOrderCard }>Ordina</button>
+          </div>
           <div className={ styles.dashboardHand }>
             <Hand cards={ cards }
                   setCards={ setCards }
                   combine={ handleCombine }
                   throwDown={ handleThrowDown }></Hand>
           </div>
-          <div className={ styles.dashboardButton }>
+          <div className={ styles.dashboardButtonPass }>
             <button>Passo</button>
           </div>
         </div>
