@@ -14,4 +14,9 @@ export class CCard {
     this.selected = selected;
     this.ready = ready;
   }
+
+  removeSelectedAndReady(): void {
+    this.selected = false;
+    this.ready = false;
+  }
 }

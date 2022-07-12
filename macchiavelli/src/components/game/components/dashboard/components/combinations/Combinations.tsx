@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '../card/Card';
 import { CCard } from '../card/class/Card';
 import { Combination } from './class/Combinations';
@@ -6,22 +6,17 @@ import styles from './Combinations.module.scss';
 
 interface Props {
   combinations: Combination[];
-  cardToAttach: CCard | undefined;
-  removeCardFromHand(card: CCard): void;
+  attachCombination(combination: Combination): void;
+  combine(card: CCard, combination: Combination): void
+  throwDown(): void;
 }
 
-export const Combinations: React.FC<Props> = ({ combinations, cardToAttach, removeCardFromHand: setCards }: Props) => {
-  const handleAttachCard = (combination: Combination): void => {
-    if(!cardToAttach) {
-      return;
-    }
+export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine, throwDown }: Props) => {
+  const [isDragStarted, setIsDragStarted] = useState(false);
 
-    if(combination.isCardCombinable(cardToAttach)) {
-      combination.cards = combination.cards.concat([cardToAttach]);
-      combination.orderCards();
-      setCards(cardToAttach);
-      cardToAttach = undefined;
-    }
+  const handleAttachCombination = (combination: Combination): void => {
+    attachCombination(combination);
+    combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
   }
 
   return (
@@ -36,7 +31,11 @@ export const Combinations: React.FC<Props> = ({ combinations, cardToAttach, remo
                     <Card key={ index2 }
                           card={ card }
                           index={ index }
-                          attachCard={ () => handleAttachCard(combination) }></Card>)
+                          attachCombination={ () => handleAttachCombination(combination) }
+                          combine={ (c: CCard) => combine(c, combination) }
+                          throwDown={ throwDown }
+                          setDragIsStartedHere={ setIsDragStarted }
+                          getDragIsStartedHere= { () => isDragStarted }></Card>)
                 }
               </span>
             )

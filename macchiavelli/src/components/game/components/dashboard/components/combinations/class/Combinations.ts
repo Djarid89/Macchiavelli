@@ -4,61 +4,87 @@ export class Combination {
   id: number;
   cards: CCard[];
 
-  constructor(id: number, cards: CCard[]) {
-    this.id = id;
+  constructor(cards: CCard[]) {
+    this.id = 0;
     this.cards = cards;
-    this.cards.forEach((c: CCard) => c.ready = this.cards.length >= 3);
+    this.cards.forEach((card: CCard) => card.ready = cards.length >= 3);
   }
 
-  isCardCombinable(card: CCard): boolean {
-    if(!this.cards.length) {
+  isCardCombinable(card: CCard, cards?: CCard[]): boolean {
+    const cardsToCheck = cards || this.cards;
+    if(!cardsToCheck.length) {
       return true;
     }
 
-    const isSameSeed = this.cards.every((c: CCard) => c.seed === card.seed);
+    const isSameSeed = cardsToCheck.every((c: CCard) => c.seed === card.seed);
     if(isSameSeed) {
-      const lower = this.cards.reduce((min: number, c: CCard) => c.number < min ? c.number : min, 13);
-      let highest = 0;
-      let maxReached = false;
-      for(const c of this.cards) {
-        if(highest === 13 && c.number === 1) {
-          maxReached = true;
-          break
-        } else if(c.number > highest) {
-          highest = c.number;
-        }
-      }
-      return this.checkInferiorLimit(card, lower) || this.checkSuperiorLimit(card, highest, maxReached);
+      const lower = cardsToCheck.reduce((min: number, c: CCard) => c.number < min ? c.number : min, 13);
+      return this.checkInferiorLimit(card, lower) || this.checkSuperiorLimit(card, this.getHighest(cardsToCheck));
     } else {
-      return this.cards.every((c: CCard) => c.number === card.number) && !this.cards.some((c: CCard) => c.seed === card.seed) && this.cards.length < 4;
+      return cardsToCheck.every((c: CCard) => c.number === card.number) && !cardsToCheck.some((c: CCard) => c.seed === card.seed) && cardsToCheck.length < 4;
     }
   }
 
-  orderCards(): void {
-    const isSameSeed = this.cards?.every((c: CCard) => c.seed === this.cards[0].seed) || false;
-    if(!isSameSeed) {
-      return;
-    }
-
-    const one = this.cards.find((card: CCard) => card.number === 1);
-    if(one) {
-      this.cards.splice(this.cards.findIndex((card: CCard) => card.number === 1), 1);
-      this.cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
-      if(this.cards.some((card: CCard) => card.number === 2)) {
-        this.cards.unshift(one);
-      } else if(this.cards.some((card: CCard) => card.number === 13)) {
-        this.cards.push(one);
+  private getHighest(cardsToCheck: CCard[]): number {
+    let highest = 0;
+    for(const c of cardsToCheck) {
+      if(highest === 13 && c.number === 1) {
+        return Number.MAX_VALUE;
+      } else if(c.number > highest) {
+        highest = c.number;
       }
-    } else {
-      this.cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
     }
+    return highest;
   }
 
   private checkInferiorLimit(card: CCard, lower: number): boolean {
     return lower > 1 && card.number === lower - 1;
   }
 
-  private checkSuperiorLimit(card: CCard, highest: number, maxReached: boolean): boolean {
-    return !maxReached && ((highest < 13 && card.number === highest + 1) || (highest === 13 && card.number === 1));
+  private checkSuperiorLimit(card: CCard, highest: number): boolean {
+    return (highest !== Number.MAX_VALUE) && ((highest < 13 && card.number === highest + 1) || (highest === 13 && card.number === 1));
+  }
+
+  orderCards(cards: CCard[]): CCard[] {
+    const isSameSeed = cards?.every((c: CCard) => c.seed === cards[0].seed) || false;
+    if(!isSameSeed) {
+      return cards;
+    }
+
+    const ones = cards.filter((card: CCard) => card.number === 1);
+    if(ones.length) {
+      this.addOnes(ones, cards);
+    } else {
+      cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
+    }
+
+    return cards;
+  }
+
+  private addOnes(ones: CCard[], cards: CCard[]): void {
+    ones.forEach((card: CCard, index: number) => {
+      cards.splice(cards.findIndex((c: CCard) => c.number === 1), 1);
+      cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
+      if(cards.some((c: CCard) => c.number === 1) || cards.some((c: CCard) => c.number === 13)) {
+        cards.push(ones[index]);
+      } else if(cards.some((c: CCard) => c.number === 2)) {
+        cards.unshift(ones[index]);
+      }
+    });
+  }
+
+  isAllCombinable(cards: CCard[]): boolean {
+    if(cards.length < 3) {
+      return false;
+    }
+    const orderedCards: CCard[] = this.orderCards(cards.map((card: CCard) => card));
+    const incrementaCards: CCard[] = [];
+    for(const card of orderedCards) {
+      if(incrementaCards.length && !this.isCardCombinable(card, incrementaCards)) {
+        return false;
+      }
+      incrementaCards.push(card);
+    }
+    return true;
   }
 }

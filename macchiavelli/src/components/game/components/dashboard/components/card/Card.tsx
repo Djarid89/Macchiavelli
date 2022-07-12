@@ -7,38 +7,46 @@ interface Props {
   index: number;
   moveFrom?(toIndex: number): void;
   doMove?(fromIndex: number): void;
-  setCardToAttach?(card: CCard): void;
-  attachCard?(): void;
+  attachCombination?(): void;
   combine?(card: CCard): void;
   throwDown?(): void;
+  setDragIsStartedHere(isStartHere: boolean): void;
+  getDragIsStartedHere(): boolean;
 }
 
-export const Card: React.FC<Props> = ({ card, index, moveFrom, setCardToAttach, doMove, attachCard, combine, throwDown }: Props) => {
-  const handleOnDragOver = (event: any): void => {
-    event.stopPropagation();
-    event.preventDefault();
+export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCombination, combine, throwDown, setDragIsStartedHere, getDragIsStartedHere }: Props) => {
+  const handleOnDragOver = (e: any): void => {
+    if(combine && e.shiftKey && !card.selected && getDragIsStartedHere()) {
+      combine(card);
+    }
+    e.stopPropagation();
+    e.preventDefault();
   }
 
   const handleDragStart = () => {
     if(moveFrom) {
       moveFrom(index);
-    } 
-    if(setCardToAttach) {
-      setCardToAttach(card);
     }
+    if(combine && !card.selected) {
+      combine(card);
+    }
+    setDragIsStartedHere(true);
   }
 
-  const handleOnDrop = () => {
+  const handleOnDrop = (e: any) => {
+    if(e.shiftKey) {
+      return;
+    }
     if(doMove) {
       doMove(index);
-    } else if(attachCard) {
-      attachCard();
+    } else if(attachCombination) {
+      attachCombination();
     }
   }
 
   const handleClick = (e: any) => {
     if(e.ctrlKey) {
-      if(card.ready && throwDown) {
+      if(throwDown) {
         throwDown();
       }
     } else if(combine) {
@@ -53,7 +61,8 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, setCardToAttach, 
             draggable
             onDragStart={ handleDragStart }
             onDragOver={ handleOnDragOver }
-            onDrop={ handleOnDrop }
+            onDragEnd={ () => setDragIsStartedHere(true) }
+            onDrop={ (e: any) => handleOnDrop(e) }
             onClick={ (e: any) => handleClick(e) }>
         <div>{ card.number }</div>
         <div>{ card.seed }</div>
