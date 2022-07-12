@@ -12,7 +12,7 @@ interface Props {
 
 export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: Props) => {
   const [from, setFrom] = useState(0);
-  const [isDragStarted, setIsDragStarted] = useState(false);
+  const [isCardDragStarted, setIsCardDragStarted] = useState(false);
 
   const doMove = (swipeTo: number): void => {
     const card = cards[from];
@@ -43,12 +43,12 @@ export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: P
           <Card key={ index + 1 }
                 card={ card }
                 index={ index }
-                moveFrom= { setFrom }
-                doMove={ doMove }
+                moveCardFrom= { setFrom }
+                moveCardTo={ doMove }
                 combine={ (c: CCard) => handleCombine(c) }
                 throwDown={ throwDown }
-                setDragIsStartedHere={ setIsDragStarted }
-                getDragIsStartedHere= { () => isDragStarted }></Card>
+                setCardDragIsStarted={ setIsCardDragStarted }
+                getCardDragIsStarted= { () => isCardDragStarted }></Card>
         )
       }
     </>
