@@ -5,18 +5,31 @@ import { CCard } from './class/Card';
 interface Props {
   card: CCard;
   index: number;
-  moveFrom?(toIndex: number): void;
-  doMove?(fromIndex: number): void;
+  isCombinationSelected?: boolean;
+  moveCardFrom?(toIndex: number): void;
+  moveCardTo?(fromIndex: number): void;
   attachCombination?(): void;
   combine?(card: CCard): void;
   throwDown?(): void;
-  setDragIsStartedHere(isStartHere: boolean): void;
-  getDragIsStartedHere(): boolean;
+  setCardDragIsStarted(isStartHere: boolean): void;
+  getCardDragIsStarted(): boolean;
 }
 
-export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCombination, combine, throwDown, setDragIsStartedHere, getDragIsStartedHere }: Props) => {
+export const Card: React.FC<Props> = ({ card,
+                                        index,
+                                        isCombinationSelected,
+                                        moveCardFrom,
+                                        moveCardTo,
+                                        attachCombination,
+                                        combine,
+                                        throwDown,
+                                        setCardDragIsStarted,
+                                        getCardDragIsStarted }: Props) => {
   const handleOnDragOver = (e: any): void => {
-    if(combine && e.shiftKey && !card.selected && getDragIsStartedHere()) {
+    if(isCombinationSelected) {
+      return;
+    }
+    if(combine && e.shiftKey && !card.selected && getCardDragIsStarted()) {
       combine(card);
     }
     e.stopPropagation();
@@ -24,27 +37,33 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCom
   }
 
   const handleDragStart = () => {
-    if(moveFrom) {
-      moveFrom(index);
+    if(isCombinationSelected) {
+      return;
+    }
+    if(moveCardFrom) {
+      moveCardFrom(index);
     }
     if(combine && !card.selected) {
       combine(card);
     }
-    setDragIsStartedHere(true);
+    setCardDragIsStarted(true);
   }
 
   const handleOnDrop = (e: any) => {
-    if(e.shiftKey) {
+    if(e.shiftKey || isCombinationSelected) {
       return;
     }
-    if(doMove) {
-      doMove(index);
+    if(moveCardTo) {
+      moveCardTo(index);
     } else if(attachCombination) {
       attachCombination();
     }
   }
 
   const handleClick = (e: any) => {
+    if(isCombinationSelected) {
+      return;
+    }
     if(e.ctrlKey) {
       if(throwDown) {
         throwDown();
@@ -57,11 +76,11 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCom
   return (
     <>
       <span className={ `${styles.card} ${card.selected ? styles.selected : ''} ${card.ready ? styles.ready : ''}` }
-            style={{ zIndex: index }}
             draggable
+            style={{ zIndex: index, border: isCombinationSelected ? '2px solid red' : '' }}
             onDragStart={ handleDragStart }
             onDragOver={ handleOnDragOver }
-            onDragEnd={ () => setDragIsStartedHere(true) }
+            onDragEnd={ () => setCardDragIsStarted(true) }
             onDrop={ (e: any) => handleOnDrop(e) }
             onClick={ (e: any) => handleClick(e) }>
         <div>{ card.number }</div>
