@@ -37,30 +37,26 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
   return (
     <>
       {
-        <span className={ styles.combinations }
-              draggable
-              style={ style }
-              onDragEnd={ handleDragEnd }
-              onDoubleClick={ handleOnDoubleClick }>
-          {
-            combinations.map((combination: Combination, index: number) =>
-              <span className={ styles.cardContainer } key={ index }>
-                {
-                  combination.cards.map((card: CCard, index2: number) =>
-                    <Card key={ index2 }
-                          isCombinationSelected={isCombinationSelected}
-                          card={ card }
-                          index={ index }
-                          attachCombination={ () => handleAttachCombination(combination) }
-                          combine={ (c: CCard) => combine(c, combination) }
-                          throwDown={ throwDown }
-                          setCardDragIsStarted={ setCardIsDragStarted }
-                          getCardDragIsStarted= { () => isCardDragStarted }></Card>)
-                }
-              </span>
-            )
-          }
-        </span>
+        combinations.map((combination: Combination, index: number) =>
+          <span className={ styles.combination }
+                style={ style }
+                onDragEnd={ handleDragEnd }
+                onDoubleClick={ handleOnDoubleClick }
+                key={ index }>
+            {
+              combination.cards.map((card: CCard, index2: number) =>
+                <Card key={ index2 }
+                      isCombinationSelected={isCombinationSelected}
+                      card={ card }
+                      index={ index }
+                      attachCombination={ () => handleAttachCombination(combination) }
+                      combine={ (c: CCard) => combine(c, combination) }
+                      throwDown={ throwDown }
+                      setCardDragIsStarted={ setCardIsDragStarted }
+                      getCardDragIsStarted= { () => isCardDragStarted }></Card>)
+            }
+          </span>
+        )
       }
     </>
   );
