@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '../card/Card';
 import { CCard } from '../card/class/Card';
 import { Combination } from '../combinations/class/Combinations';
@@ -12,16 +12,22 @@ interface Props {
 
 export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: Props) => {
   let from: number;
+  const [isDragStarted, setIsDragStarted] = useState(false);
 
   const moveFrom = (indexFrom: number): void => {
     from = indexFrom;
   }
 
   const doMove = (swipeTo: number): void => {
-    const cardToMove = new CCard(cards[from].id, cards[from].number, cards[from].seed, cards[from].selected, cards[from].ready);
+    const card = cards[from];
+    if(!card) {
+      return;
+    }
+
+    const cardToMove = new CCard(card.id, card.number, card.seed, card.selected, card.ready);
     cards.splice(from, 1);
     cards.splice(swipeTo, 0, cardToMove);
-    setCards(cards.map((card: CCard) => card));
+    setCards(cards.map((c: CCard) => c));
   }
 
   const handleCombine = (card: CCard): void => {
@@ -44,7 +50,9 @@ export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: P
                 moveFrom={ moveFrom }
                 doMove={ doMove }
                 combine={ (c: CCard) => handleCombine(c) }
-                throwDown={ throwDown }></Card>
+                throwDown={ throwDown }
+                setDragIsStartedHere={ setIsDragStarted }
+                getDragIsStartedHere= { () => isDragStarted }></Card>
         )
       }
     </>

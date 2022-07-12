@@ -10,12 +10,17 @@ interface Props {
   attachCombination?(): void;
   combine?(card: CCard): void;
   throwDown?(): void;
+  setDragIsStartedHere(isStartHere: boolean): void;
+  getDragIsStartedHere(): boolean;
 }
 
-export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCombination, combine, throwDown }: Props) => {
+export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCombination, combine, throwDown, setDragIsStartedHere, getDragIsStartedHere }: Props) => {
   const handleOnDragOver = (event: any): void => {
     event.stopPropagation();
     event.preventDefault();
+    if(combine && !card.selected && getDragIsStartedHere()) {
+      combine(card);
+    }
   }
 
   const handleDragStart = () => {
@@ -25,6 +30,7 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCom
     if(combine && !card.selected) {
       combine(card);
     }
+    setDragIsStartedHere(true);
   }
 
   const handleOnDrop = () => {
@@ -52,6 +58,7 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCom
             draggable
             onDragStart={ handleDragStart }
             onDragOver={ handleOnDragOver }
+            onDragEnd={ () => setDragIsStartedHere(true) }
             onDrop={ handleOnDrop }
             onClick={ (e: any) => handleClick(e) }>
         <div>{ card.number }</div>

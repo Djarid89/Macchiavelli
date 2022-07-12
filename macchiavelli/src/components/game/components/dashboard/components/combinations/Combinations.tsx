@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '../card/Card';
 import { CCard } from '../card/class/Card';
 import { Combination } from './class/Combinations';
@@ -12,6 +12,8 @@ interface Props {
 }
 
 export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine, throwDown }: Props) => {
+  const [isDragStarted, setIsDragStarted] = useState(false);
+
   const handleAttachCombination = (combination: Combination): void => {
     attachCombination(combination);
     combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
@@ -31,7 +33,9 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
                           index={ index }
                           attachCombination={ () => handleAttachCombination(combination) }
                           combine={ (c: CCard) => combine(c, combination) }
-                          throwDown={ throwDown }></Card>)
+                          throwDown={ throwDown }
+                          setDragIsStartedHere={ setIsDragStarted }
+                          getDragIsStartedHere= { () => isDragStarted }></Card>)
                 }
               </span>
             )
