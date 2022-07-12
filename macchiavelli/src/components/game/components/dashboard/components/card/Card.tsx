@@ -15,12 +15,12 @@ interface Props {
 }
 
 export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCombination, combine, throwDown, setDragIsStartedHere, getDragIsStartedHere }: Props) => {
-  const handleOnDragOver = (event: any): void => {
-    event.stopPropagation();
-    event.preventDefault();
-    if(combine && !card.selected && getDragIsStartedHere()) {
+  const handleOnDragOver = (e: any): void => {
+    if(combine && e.shiftKey && !card.selected && getDragIsStartedHere()) {
       combine(card);
     }
+    e.stopPropagation();
+    e.preventDefault();
   }
 
   const handleDragStart = () => {
@@ -33,7 +33,10 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCom
     setDragIsStartedHere(true);
   }
 
-  const handleOnDrop = () => {
+  const handleOnDrop = (e: any) => {
+    if(e.shiftKey) {
+      return;
+    }
     if(doMove) {
       doMove(index);
     } else if(attachCombination) {
@@ -59,7 +62,7 @@ export const Card: React.FC<Props> = ({ card, index, moveFrom, doMove, attachCom
             onDragStart={ handleDragStart }
             onDragOver={ handleOnDragOver }
             onDragEnd={ () => setDragIsStartedHere(true) }
-            onDrop={ handleOnDrop }
+            onDrop={ (e: any) => handleOnDrop(e) }
             onClick={ (e: any) => handleClick(e) }>
         <div>{ card.number }</div>
         <div>{ card.seed }</div>

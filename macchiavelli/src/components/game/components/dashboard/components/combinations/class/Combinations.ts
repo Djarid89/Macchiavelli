@@ -53,15 +53,7 @@ export class Combination {
 
     const ones = cards.filter((card: CCard) => card.number === 1);
     if(ones.length) {
-      ones.forEach((card: CCard, index: number) => {
-        cards.splice(cards.findIndex((c: CCard) => c.number === 1), 1);
-        cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
-        if(cards.some((c: CCard) => c.number === 1) || cards.some((c: CCard) => c.number === 13)) {
-          cards.push(ones[index]);
-        } else if(cards.some((c: CCard) => c.number === 2)) {
-          cards.unshift(ones[index]);
-        }
-      });
+      this.addOnes(ones, cards);
     } else {
       cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
     }
@@ -69,10 +61,17 @@ export class Combination {
     return cards;
   }
 
-  // isCardRemovable(): boolean {
-  //   const numberOfCardsSelected = this.cards.reduce((sum: number, card: CCard) => card.selected ? sum + 1 : sum, 0);
-  //   return this.cards.length - numberOfCardsSelected > 3;
-  // }
+  private addOnes(ones: CCard[], cards: CCard[]): void {
+    ones.forEach((card: CCard, index: number) => {
+      cards.splice(cards.findIndex((c: CCard) => c.number === 1), 1);
+      cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
+      if(cards.some((c: CCard) => c.number === 1) || cards.some((c: CCard) => c.number === 13)) {
+        cards.push(ones[index]);
+      } else if(cards.some((c: CCard) => c.number === 2)) {
+        cards.unshift(ones[index]);
+      }
+    });
+  }
 
   isAllCombinable(cards: CCard[]): boolean {
     if(cards.length < 3) {

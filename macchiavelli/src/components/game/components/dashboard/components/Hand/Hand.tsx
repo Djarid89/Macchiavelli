@@ -11,12 +11,8 @@ interface Props {
 }
 
 export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: Props) => {
-  let from: number;
+  const [from, setFrom] = useState(0);
   const [isDragStarted, setIsDragStarted] = useState(false);
-
-  const moveFrom = (indexFrom: number): void => {
-    from = indexFrom;
-  }
 
   const doMove = (swipeTo: number): void => {
     const card = cards[from];
@@ -47,7 +43,7 @@ export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: P
           <Card key={ index + 1 }
                 card={ card }
                 index={ index }
-                moveFrom={ moveFrom }
+                moveFrom= { setFrom }
                 doMove={ doMove }
                 combine={ (c: CCard) => handleCombine(c) }
                 throwDown={ throwDown }
