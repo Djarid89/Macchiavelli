@@ -30,7 +30,7 @@ export class CDeck {
 
   getCards(cardsNumber?: number): CCard[] {
     const cards: CCard[] = [];
-    for(let i = 0; i < (cardsNumber || 12); i++) {
+    for(let i = 0; i < (cardsNumber || 52); i++) {
       const card = this.cards.pop();
       if(card) {
         cards.push(card);

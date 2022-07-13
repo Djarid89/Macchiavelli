@@ -6,10 +6,9 @@ interface Props {
   cards: CCard[];
   setCards(cards: CCard[]): void;
   combine(card: CCard): void;
-  throwDown(): void
 }
 
-export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: Props) => {
+export const Hand: React.FC<Props> = ({ cards, setCards, combine }: Props) => {
   const [from, setFrom] = useState(0);
   const [isCardDragStarted, setIsCardDragStarted] = useState(false);
 
@@ -35,7 +34,6 @@ export const Hand: React.FC<Props> = ({ cards, setCards, combine, throwDown }: P
                 moveCardFrom= { setFrom }
                 moveCardTo={ doMove }
                 combine={ combine }
-                throwDown={ throwDown }
                 setCardDragIsStarted={ setIsCardDragStarted }
                 getCardDragIsStarted= { () => isCardDragStarted }></Card>
         )

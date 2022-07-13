@@ -17,7 +17,6 @@ interface Props {
   moveCardTo?(fromIndex: number): void;
   attachCombination?(): void;
   combine?(card: CCard): void;
-  throwDown?(): void;
   setCardDragIsStarted(isStartHere: boolean): void;
   getCardDragIsStarted(): boolean;
 }
@@ -29,14 +28,13 @@ export const Card: React.FC<Props> = ({ card,
                                         moveCardTo,
                                         attachCombination,
                                         combine,
-                                        throwDown,
                                         setCardDragIsStarted,
                                         getCardDragIsStarted }: Props) => {
   const handleOnDragOver = (e: any): void => {
     if(isCombinationSelected) {
       return;
     }
-    if(combine && e.shiftKey && !card.selected && getCardDragIsStarted()) {
+    if(combine && e.altKey && !card.selected && getCardDragIsStarted()) {
       combine(card);
     }
     e.stopPropagation();
@@ -57,7 +55,7 @@ export const Card: React.FC<Props> = ({ card,
   }
 
   const handleOnDrop = (e: any) => {
-    if(e.shiftKey || isCombinationSelected) {
+    if(e.altKey || isCombinationSelected) {
       return;
     }
     if(moveCardTo) {
@@ -71,11 +69,7 @@ export const Card: React.FC<Props> = ({ card,
     if(isCombinationSelected) {
       return;
     }
-    if(e.ctrlKey) {
-      if(throwDown) {
-        throwDown();
-      }
-    } else if(combine) {
+    if(combine) {
       combine(card);
     }
   }

@@ -33,16 +33,26 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     }
   }
 
-  const handleThrowDown = (): void => {
+  const handleThrowDown = (e?: any): void => {
     if(!combination.isAllCombinable(combination.cards)) {
       return;
+    }
+
+    if(e) {
+      combination.positionTop = e.clientY - e.target.offsetTop - 125;
+      combination.positionLeft = e.clientX - e.target.offsetLeft;
     }
     combination.cards = Combination.orderCards(combination.cards);
     combination.id = combinations.length + 1;
     combination.cards.forEach((card: CCard) => card.selected = false);
-    setCombinations(combinations.concat([combination]));
+    const newCombinations = combinations.concat([combination.copyCombination()]);
+    newCombinations.forEach((comb: Combination) => {
+      if(comb.id !== combination.id) {
+        comb.cards = comb.cards.filter((card: CCard, index: number) => !card.selected);
+      }
+    });
+    setCombinations(newCombinations);
     setCards(cards.filter((card: CCard) => !card.selected));
-    // combinations.forEach((comb: Combination) => comb.cards = comb.cards.filter((card: CCard) => !combination.cards.some((c: CCard) => c.id === card.id)));
     combination.cards.forEach((card: CCard) => card.selected = false);
     setCombination(new Combination([]));
   }
@@ -68,16 +78,20 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     setCards(cards.map((card: CCard) => card));
   }
 
+  const handleDroppable = (e:any) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
   return (
     <>
       <div className={ styles.dashboard }>
         <div className={ styles.dashboardHeader }>
           { players.map((player: IPlayer, index: number) => <span key={index}>{player.name}</span>) }
         </div>
-        <div className={ styles.dashboardContainer }>
+        <div className={ styles.dashboardContainer } onDrop={ (e: any) => handleThrowDown(e) } onDragOver={ handleDroppable } onDragEnter={ handleDroppable }>
           <Combinations combinations={ combinations }
                         combine={ handleCombine }
-                        throwDown= { handleThrowDown }
                         attachCombination={ (combinationToAttach: Combination) => handleAttachCombination(combinationToAttach) }></Combinations>
           <span className={ styles.deckContainer }>
             <Deck setCards={ setCards } addCard={ (cardToAdd: CCard) => { setCards(cards.concat([cardToAdd])) } }></Deck>
@@ -88,10 +102,7 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
             <button onClick={ handleOrderCard }>Ordina</button>
           </div>
           <div className={ styles.dashboardHand }>
-            <Hand cards={ cards }
-                  setCards={ setCards }
-                  combine={ handleCombine }
-                  throwDown={ handleThrowDown }></Hand>
+            <Hand cards={ cards } setCards={ setCards } combine={ handleCombine }></Hand>
           </div>
           <div className={ styles.dashboardButtonPass }>
             <button>Passo</button>

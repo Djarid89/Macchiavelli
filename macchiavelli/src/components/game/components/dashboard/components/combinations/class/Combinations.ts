@@ -3,10 +3,25 @@ import { CCard } from "../../card/class/Card";
 export class Combination {
   id: number;
   cards: CCard[];
+  positionTop: number;
+  positionLeft: number;
+  zIndex: number;
 
   constructor(cards: CCard[]) {
     this.id = 0;
     this.cards = cards;
+    this.positionTop = 0;
+    this.positionLeft = 0;
+    this.zIndex = 0;
+  }
+
+  copyCombination(): Combination {
+    const newCombination = new Combination(this.cards.map((card: CCard) => card));
+    newCombination.id = this.id;
+    newCombination.positionTop = this.positionTop;
+    newCombination.positionLeft = this.positionLeft;
+    newCombination.zIndex = this.zIndex;
+    return newCombination;
   }
 
   isCardCombinable(card: CCard, cards?: CCard[]): boolean {
