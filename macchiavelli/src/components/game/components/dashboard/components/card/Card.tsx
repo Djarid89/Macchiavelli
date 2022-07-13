@@ -2,6 +2,13 @@ import React from 'react';
 import styles from './Card.module.scss';
 import { CCard } from './class/Card';
 
+function importAll(r: any) {
+  const result: any = {};
+   r.keys().forEach((item: any, index: number) => result[item.replace('./', '')] = r(item));
+  return result
+ }
+ const images = importAll(require.context('../../../../../../assets', false, /\.(png|jpe?g|svg)$/));
+
 interface Props {
   card: CCard;
   index: number;
@@ -36,8 +43,8 @@ export const Card: React.FC<Props> = ({ card,
     e.preventDefault();
   }
 
-  const handleDragStart = () => {
-    if(isCombinationSelected) {
+  const handleDragStart = (e: any) => {
+    if(isCombinationSelected || e.shiftKey) {
       return;
     }
     if(moveCardFrom) {
@@ -75,16 +82,15 @@ export const Card: React.FC<Props> = ({ card,
 
   return (
     <>
-      <span className={ `${styles.card} ${card.selected ? styles.selected : ''} ${card.ready ? styles.ready : ''}` }
+      <span className={ `${styles.card} ${card.selected ? styles.selected : ''}` }
             draggable
-            style={{ zIndex: index, border: isCombinationSelected ? '2px solid red' : '' }}
-            onDragStart={ handleDragStart }
+            style={{ zIndex: index }}
+            onDragStart={ (e: any) => handleDragStart(e) }
             onDragOver={ handleOnDragOver }
             onDragEnd={ () => setCardDragIsStarted(true) }
             onDrop={ (e: any) => handleOnDrop(e) }
             onClick={ (e: any) => handleClick(e) }>
-        <div>{ card.number }</div>
-        <div>{ card.seed }</div>
+        <img src={ images[`${card.number}_${card.seed}.svg`] } alt='mySvgImage' />
       </span>
     </>
   );

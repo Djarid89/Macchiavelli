@@ -18,7 +18,7 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
 
   const handleAttachCombination = (combination: Combination): void => {
     attachCombination(combination);
-    combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
+    combination.cards.forEach((card: CCard) => card.selected = false);
   }
 
   const handleDragEnd = (e: any) => {
@@ -29,7 +29,10 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
     setIsCombinationSelected(false);
   }
 
-  const handleOnDoubleClick = (): void => {
+  const handleOnDragStart = (e: any): void => {
+    if(!e.shiftKey) {
+      return;
+    }
     setIsCombinationSelected(!isCombinationSelected);
     setStyle({ top: style.top, left: style.left, zIndex: isCombinationSelected ? 14 : 0 });
   }
@@ -41,7 +44,7 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
           <span className={ styles.combination }
                 style={ style }
                 onDragEnd={ handleDragEnd }
-                onDoubleClick={ handleOnDoubleClick }
+                onDragStart={ (e: any) => handleOnDragStart(e) }
                 key={ index }>
             {
               combination.cards.map((card: CCard, index2: number) =>

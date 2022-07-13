@@ -7,7 +7,6 @@ export class Combination {
   constructor(cards: CCard[]) {
     this.id = 0;
     this.cards = cards;
-    this.cards.forEach((card: CCard) => card.ready = cards.length >= 3);
   }
 
   isCardCombinable(card: CCard, cards?: CCard[]): boolean {
@@ -45,7 +44,7 @@ export class Combination {
     return (highest !== Number.MAX_VALUE) && ((highest < 13 && card.number === highest + 1) || (highest === 13 && card.number === 1));
   }
 
-  orderCards(cards: CCard[]): CCard[] {
+  static orderCards(cards: CCard[]): CCard[] {
     const isSameSeed = cards?.every((c: CCard) => c.seed === cards[0].seed) || false;
     if(!isSameSeed) {
       return cards;
@@ -61,7 +60,7 @@ export class Combination {
     return cards;
   }
 
-  private addOnes(ones: CCard[], cards: CCard[]): void {
+  private static addOnes(ones: CCard[], cards: CCard[]): void {
     ones.forEach((card: CCard, index: number) => {
       cards.splice(cards.findIndex((c: CCard) => c.number === 1), 1);
       cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
@@ -77,7 +76,7 @@ export class Combination {
     if(cards.length < 3) {
       return false;
     }
-    const orderedCards: CCard[] = this.orderCards(cards.map((card: CCard) => card));
+    const orderedCards: CCard[] = Combination.orderCards(cards.map((card: CCard) => card));
     const incrementaCards: CCard[] = [];
     for(const card of orderedCards) {
       if(incrementaCards.length && !this.isCardCombinable(card, incrementaCards)) {

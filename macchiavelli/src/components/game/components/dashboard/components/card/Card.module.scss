@@ -3,16 +3,9 @@ $width: 100px;
 .card {
   width: $width;
   height: 125px;
-  border: 1px solid black;
   margin-right: calc(($width * -1) + 20px);
-  background-color: white;  // remove when images comes
 
   &.selected {
-    border: 2px solid blue;
     transform: translateY(-30px);
-  }
-
-  &.ready {
-    border-color: green;
   }
 }
