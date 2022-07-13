@@ -8,30 +8,32 @@ interface Props {
   combinations: Combination[];
   attachCombination(combination: Combination): void;
   combine(card: CCard, combination: Combination): void
-  throwDown(): void;
 }
 
-export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine, throwDown }: Props) => {
+export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine }: Props) => {
   const [isCardDragStarted, setCardIsDragStarted] = useState(false);
   const [isCombinationSelected, setIsCombinationSelected] = useState(false);
-  const [style, setStyle] = useState({ top: 0, left: 0, zIndex: 0 });
 
   const handleAttachCombination = (combination: Combination): void => {
     attachCombination(combination);
-    combination.cards.forEach((card: CCard) => card.removeSelectedAndReady());
+    combination.cards.forEach((card: CCard) => card.selected = false);
   }
 
-  const handleDragEnd = (e: any) => {
+  const handleDragEnd = (e: any, combination: Combination) => {
     if(!isCombinationSelected) {
       return;
     }
-    setStyle({ top: e.clientY - e.target.offsetTop - 125, left: e.clientX - e.target.offsetLeft, zIndex: style.zIndex });
+    combination.positionTop = e.clientY - e.target.offsetTop - 125;
+    combination.positionLeft = e.clientX - e.target.offsetLeft;
     setIsCombinationSelected(false);
   }
 
-  const handleOnDoubleClick = (): void => {
+  const handleOnDragStart = (e: any, combination: Combination): void => {
+    if(!e.shiftKey) {
+      return;
+    }
     setIsCombinationSelected(!isCombinationSelected);
-    setStyle({ top: style.top, left: style.left, zIndex: isCombinationSelected ? 14 : 0 });
+    combination.zIndex = isCombinationSelected ? 14 : 0;
   }
 
   return (
@@ -39,19 +41,18 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
       {
         combinations.map((combination: Combination, index: number) =>
           <span className={ styles.combination }
-                style={ style }
-                onDragEnd={ handleDragEnd }
-                onDoubleClick={ handleOnDoubleClick }
+                style={{ zIndex: isCombinationSelected ? 14 : 0, top: combination.positionTop, left: combination.positionLeft }}
+                onDragEnd={ (e: any) => handleDragEnd(e, combination) }
+                onDragStart={ (e: any) => handleOnDragStart(e, combination) }
                 key={ index }>
             {
               combination.cards.map((card: CCard, index2: number) =>
                 <Card key={ index2 }
                       isCombinationSelected={isCombinationSelected}
                       card={ card }
-                      index={ index }
+                      index={ index2 }
                       attachCombination={ () => handleAttachCombination(combination) }
                       combine={ (c: CCard) => combine(c, combination) }
-                      throwDown={ throwDown }
                       setCardDragIsStarted={ setCardIsDragStarted }
                       getCardDragIsStarted= { () => isCardDragStarted }></Card>)
             }

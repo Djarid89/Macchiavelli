@@ -2,6 +2,13 @@ import React from 'react';
 import styles from './Card.module.scss';
 import { CCard } from './class/Card';
 
+function importAll(r: any) {
+  const result: any = {};
+   r.keys().forEach((item: any, index: number) => result[item.replace('./', '')] = r(item));
+  return result
+ }
+ const images = importAll(require.context('../../../../../../assets', false, /\.(png|jpe?g|svg)$/));
+
 interface Props {
   card: CCard;
   index: number;
@@ -10,7 +17,6 @@ interface Props {
   moveCardTo?(fromIndex: number): void;
   attachCombination?(): void;
   combine?(card: CCard): void;
-  throwDown?(): void;
   setCardDragIsStarted(isStartHere: boolean): void;
   getCardDragIsStarted(): boolean;
 }
@@ -22,22 +28,21 @@ export const Card: React.FC<Props> = ({ card,
                                         moveCardTo,
                                         attachCombination,
                                         combine,
-                                        throwDown,
                                         setCardDragIsStarted,
                                         getCardDragIsStarted }: Props) => {
   const handleOnDragOver = (e: any): void => {
     if(isCombinationSelected) {
       return;
     }
-    if(combine && e.shiftKey && !card.selected && getCardDragIsStarted()) {
+    if(combine && e.altKey && !card.selected && getCardDragIsStarted()) {
       combine(card);
     }
     e.stopPropagation();
     e.preventDefault();
   }
 
-  const handleDragStart = () => {
-    if(isCombinationSelected) {
+  const handleDragStart = (e: any) => {
+    if(isCombinationSelected || e.shiftKey) {
       return;
     }
     if(moveCardFrom) {
@@ -50,7 +55,7 @@ export const Card: React.FC<Props> = ({ card,
   }
 
   const handleOnDrop = (e: any) => {
-    if(e.shiftKey || isCombinationSelected) {
+    if(e.altKey || isCombinationSelected) {
       return;
     }
     if(moveCardTo) {
@@ -64,27 +69,22 @@ export const Card: React.FC<Props> = ({ card,
     if(isCombinationSelected) {
       return;
     }
-    if(e.ctrlKey) {
-      if(throwDown) {
-        throwDown();
-      }
-    } else if(combine) {
+    if(combine) {
       combine(card);
     }
   }
 
   return (
     <>
-      <span className={ `${styles.card} ${card.selected ? styles.selected : ''} ${card.ready ? styles.ready : ''}` }
+      <span className={ `${styles.card} ${card.selected ? styles.selected : ''}` }
             draggable
-            style={{ zIndex: index, border: isCombinationSelected ? '2px solid red' : '' }}
-            onDragStart={ handleDragStart }
+            style={{ zIndex: index }}
+            onDragStart={ (e: any) => handleDragStart(e) }
             onDragOver={ handleOnDragOver }
             onDragEnd={ () => setCardDragIsStarted(true) }
             onDrop={ (e: any) => handleOnDrop(e) }
             onClick={ (e: any) => handleClick(e) }>
-        <div>{ card.number }</div>
-        <div>{ card.seed }</div>
+        <img src={ images[`${card.number}_${card.seed}.svg`] } alt='mySvgImage' />
       </span>
     </>
   );

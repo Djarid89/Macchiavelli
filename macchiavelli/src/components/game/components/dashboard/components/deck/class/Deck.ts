@@ -1,4 +1,5 @@
 import { CCard } from "../../card/class/Card";
+import { Combination } from "../../combinations/class/Combinations";
 
 export class CDeck {
   cards: CCard[] = [];
@@ -35,6 +36,7 @@ export class CDeck {
         cards.push(card);
       }
     }
+    cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
     return cards;
   }
 
