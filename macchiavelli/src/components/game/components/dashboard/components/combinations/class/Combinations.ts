@@ -83,6 +83,8 @@ export class Combination {
         cards.push(ones[index]);
       } else if(cards.some((c: CCard) => c.number === 2)) {
         cards.unshift(ones[index]);
+      } else {
+        cards.push(ones[index]);
       }
     });
   }

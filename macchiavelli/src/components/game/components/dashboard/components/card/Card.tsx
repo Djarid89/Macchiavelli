@@ -17,8 +17,6 @@ interface Props {
   moveCardTo?(fromIndex: number): void;
   attachCombination?(): void;
   combine?(card: CCard): void;
-  setCardDragIsStarted(isStartHere: boolean): void;
-  getCardDragIsStarted(): boolean;
 }
 
 export const Card: React.FC<Props> = ({ card,
@@ -27,14 +25,12 @@ export const Card: React.FC<Props> = ({ card,
                                         moveCardFrom,
                                         moveCardTo,
                                         attachCombination,
-                                        combine,
-                                        setCardDragIsStarted,
-                                        getCardDragIsStarted }: Props) => {
+                                        combine }: Props) => {
   const handleOnDragOver = (e: any): void => {
     if(isCombinationSelected) {
       return;
     }
-    if(combine && e.altKey && !card.selected && getCardDragIsStarted()) {
+    if(combine && e.altKey && !card.selected) {
       combine(card);
     }
     e.stopPropagation();
@@ -51,7 +47,6 @@ export const Card: React.FC<Props> = ({ card,
     if(combine && !card.selected) {
       combine(card);
     }
-    setCardDragIsStarted(true);
   }
 
   const handleOnDrop = (e: any) => {
@@ -81,7 +76,6 @@ export const Card: React.FC<Props> = ({ card,
             style={{ zIndex: index }}
             onDragStart={ (e: any) => handleDragStart(e) }
             onDragOver={ handleOnDragOver }
-            onDragEnd={ () => setCardDragIsStarted(true) }
             onDrop={ (e: any) => handleOnDrop(e) }
             onClick={ (e: any) => handleClick(e) }>
         <img src={ images[`${card.number}_${card.seed}.svg`] } alt='mySvgImage' />

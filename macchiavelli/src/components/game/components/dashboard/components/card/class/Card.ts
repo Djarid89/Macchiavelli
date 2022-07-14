@@ -6,7 +6,7 @@ export class CCard {
   seed: Seed;
   selected: boolean;
 
-  constructor(id: number, number: number, seed: Seed, selected = false, ready = false) {
+  constructor(id: number, number: number, seed: Seed, selected = false) {
     this.id = id;
     this.number = number;
     this.seed = seed

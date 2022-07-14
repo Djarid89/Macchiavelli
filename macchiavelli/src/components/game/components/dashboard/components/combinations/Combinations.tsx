@@ -7,17 +7,11 @@ import styles from './Combinations.module.scss';
 interface Props {
   combinations: Combination[];
   attachCombination(combination: Combination): void;
-  combine(card: CCard, combination: Combination): void
+  combine(card: CCard, combination: Combination): void;
 }
 
 export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine }: Props) => {
-  const [isCardDragStarted, setCardIsDragStarted] = useState(false);
   const [isCombinationSelected, setIsCombinationSelected] = useState(false);
-
-  const handleAttachCombination = (combination: Combination): void => {
-    attachCombination(combination);
-    combination.cards.forEach((card: CCard) => card.selected = false);
-  }
 
   const handleDragEnd = (e: any, combination: Combination) => {
     if(!isCombinationSelected) {
@@ -51,10 +45,8 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
                       isCombinationSelected={isCombinationSelected}
                       card={ card }
                       index={ index2 }
-                      attachCombination={ () => handleAttachCombination(combination) }
-                      combine={ (c: CCard) => combine(c, combination) }
-                      setCardDragIsStarted={ setCardIsDragStarted }
-                      getCardDragIsStarted= { () => isCardDragStarted }></Card>)
+                      attachCombination={ () => attachCombination(combination) }
+                      combine={ (c: CCard) => combine(c, combination) }></Card>)
             }
           </span>
         )

@@ -1,5 +1,4 @@
 import { CCard } from "../../card/class/Card";
-import { Combination } from "../../combinations/class/Combinations";
 
 export class CDeck {
   cards: CCard[] = [];
@@ -30,7 +29,7 @@ export class CDeck {
 
   getCards(cardsNumber?: number): CCard[] {
     const cards: CCard[] = [];
-    for(let i = 0; i < (cardsNumber || 52); i++) {
+    for(let i = 0; i < (cardsNumber || 72); i++) {
       const card = this.cards.pop();
       if(card) {
         cards.push(card);

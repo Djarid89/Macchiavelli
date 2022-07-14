@@ -15,6 +15,7 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
   const [cards, setCards] = useState<CCard[]>([]);
   const [combination, setCombination] = useState<Combination>(new Combination([]));
   const [combinations, setCombinations] = useState<Combination[]>([]);
+  let isOnAttach = false;
 
   const handleCombine = (card: CCard): void => {
     let combCards: CCard[] = combination.cards;
@@ -34,7 +35,12 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
   }
 
   const handleThrowDown = (e?: any): void => {
-    if(!combination.isAllCombinable(combination.cards)) {
+    if(e.altKey) {
+      return;
+    }
+
+    if(isOnAttach) {
+      isOnAttach = false;
       return;
     }
 
@@ -46,25 +52,22 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     combination.id = combinations.length + 1;
     combination.cards.forEach((card: CCard) => card.selected = false);
     const newCombinations = combinations.concat([combination.copyCombination()]);
-    newCombinations.forEach((comb: Combination) => {
-      if(comb.id !== combination.id) {
-        comb.cards = comb.cards.filter((card: CCard, index: number) => !card.selected);
-      }
-    });
-    setCombinations(newCombinations);
+    newCombinations.forEach((comb: Combination) => comb.cards = comb.cards.filter((card: CCard) => !card.selected));
+    setCombinations(newCombinations.filter((comb: Combination) => comb.cards.length));
     setCards(cards.filter((card: CCard) => !card.selected));
     combination.cards.forEach((card: CCard) => card.selected = false);
     setCombination(new Combination([]));
   }
 
-  const handleAttachCombination = (combinationToAttach: Combination): void => {
-    if(!combination.isAllCombinable(combination.cards.concat(combinationToAttach.cards || []))) {
+  const handleAttachCombination = (combinationToModify: Combination): void => {
+    isOnAttach = true;
+    if(!combination.isAllCombinable(combination.cards.concat(combinationToModify.cards || []))) {
       return;
     }
-    combination.cards.forEach((card: CCard) => combinationToAttach.cards = combinationToAttach.cards.concat([card]));
-    combinationToAttach.cards = Combination.orderCards(combinationToAttach.cards);
+    combinationToModify.cards = Combination.orderCards(combinationToModify.cards.concat(combination.cards));
+    combinationToModify.cards.forEach((card: CCard) => card.selected = false);
     combinations.forEach((comb: Combination) => {
-      if(comb.id !== combinationToAttach.id) {
+      if(comb.id !== combinationToModify.id) {
         comb.cards = comb.cards.filter((card: CCard) => !card.selected);
       }
     });

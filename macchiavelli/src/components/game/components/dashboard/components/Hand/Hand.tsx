@@ -33,9 +33,7 @@ export const Hand: React.FC<Props> = ({ cards, setCards, combine }: Props) => {
                 index={ index }
                 moveCardFrom= { setFrom }
                 moveCardTo={ doMove }
-                combine={ combine }
-                setCardDragIsStarted={ setIsCardDragStarted }
-                getCardDragIsStarted= { () => isCardDragStarted }></Card>
+                combine={ combine }></Card>
         )
       }
     </>
