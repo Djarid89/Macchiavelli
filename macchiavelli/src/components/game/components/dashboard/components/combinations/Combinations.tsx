@@ -8,9 +8,10 @@ interface Props {
   combinations: Combination[];
   attachCombination(combination: Combination): void;
   combine(card: CCard, combination: Combination): void;
+  unsetCombination(): void;
 }
 
-export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine }: Props) => {
+export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine, unsetCombination }: Props) => {
   const [isCombinationSelected, setIsCombinationSelected] = useState(false);
 
   const handleDragEnd = (e: any, combination: Combination) => {
@@ -25,6 +26,9 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
   const handleOnDragStart = (e: any, combination: Combination): void => {
     if(!e.shiftKey) {
       return;
+    } else {
+      combination.cards.forEach((card: CCard) => card.selected = false);
+      unsetCombination();
     }
     setIsCombinationSelected(!isCombinationSelected);
     combination.zIndex = isCombinationSelected ? 14 : 0;

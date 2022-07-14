@@ -10,7 +10,6 @@ interface Props {
 
 export const Hand: React.FC<Props> = ({ cards, setCards, combine }: Props) => {
   const [from, setFrom] = useState(0);
-  const [isCardDragStarted, setIsCardDragStarted] = useState(false);
 
   const doMove = (swipeTo: number): void => {
     const card = cards[from];

@@ -95,7 +95,8 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
         <div className={ styles.dashboardContainer } onDrop={ (e: any) => handleThrowDown(e) } onDragOver={ handleDroppable } onDragEnter={ handleDroppable }>
           <Combinations combinations={ combinations }
                         combine={ handleCombine }
-                        attachCombination={ (combinationToAttach: Combination) => handleAttachCombination(combinationToAttach) }></Combinations>
+                        attachCombination={ (combinationToAttach: Combination) => handleAttachCombination(combinationToAttach) }
+                        unsetCombination={ () => setCombination(new Combination([])) }></Combinations>
           <span className={ styles.deckContainer }>
             <Deck setCards={ setCards } addCard={ (cardToAdd: CCard) => { setCards(cards.concat([cardToAdd])) } }></Deck>
           </span>
