@@ -9,14 +9,12 @@ export const Game: React.FC = () => {
   const [gameStarting, setGameStarting] = useState<boolean>(false);
 
   return (
-    <>
-      <div className={styles.game}>
-        {
-          !gameStarting ?
-          <GameHandlerer setGameStarting = { setGameStarting }  setPlayersCB = { setPlayers }></GameHandlerer> :
-          <DashBoard players = { players }></DashBoard>
-        }
-      </div>
-    </>
+    <div className={styles.game}>
+      {
+        !gameStarting ?
+        <GameHandlerer setGameStarting = { setGameStarting }  setPlayersCB = { setPlayers }></GameHandlerer> :
+        <DashBoard players = { players }></DashBoard>
+      }
+    </div>
   );
 }

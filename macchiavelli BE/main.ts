@@ -17,7 +17,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
 });
 
 io.on('connection', (socket: Socket) => {
-  socket.on('setClientId', () => {
+  socket.on('setPlayerId', (clientSendeed: Client) => {
     let validId = false;
     let random = Math.floor(Math.random() * 100000) + 1;
     while(!validId) {
@@ -26,9 +26,13 @@ io.on('connection', (socket: Socket) => {
         validId = true;
       }
     }
-    const newClient = new Client(random);
-    clients.push(newClient);
-    socket.emit('setClientId', newClient.id);
+    clientSendeed.id = random;
+    clients.push(clientSendeed);
+    socket.emit('setPlayer', clientSendeed);
+  });
+
+  socket.on('getPlayersName', () => {
+    socket.emit('setPlayersName', clients.map((client: Client) => client.name))
   });
 });
 

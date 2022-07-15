@@ -1,14 +1,12 @@
-import { CCard } from "../../dashboard/components/card/class/Card";
-import { Combination } from "../../dashboard/components/combinations/class/Combinations";
-
 export class Client {
   id: number;
+  name: string;
 
-  constructor(id: number) {
+  constructor(id: number, name: string) {
     this.id = id;
+    this.name = name;
   }
 }
-
 
 export interface ServerToClientEvents {
   // noArg: () => void;
