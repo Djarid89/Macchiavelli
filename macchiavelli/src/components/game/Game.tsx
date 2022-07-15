@@ -5,15 +5,15 @@ import { GameHandlerer } from './components/game-handlerer/GameHandlerer';
 import styles from './Game.module.scss';
 
 export const Game: React.FC = () => {
-  const [players, setPlayers] = useState<IPlayer[]>([{ name: 'Marco' }]);
-  const [gameStarting, setGameStarting] = useState<boolean>(true);
+  const [players, setPlayers] = useState<IPlayer[]>([]);
+  const [gameStarting, setGameStarting] = useState<boolean>(false);
 
   return (
     <>
       <div className={styles.game}>
         {
           !gameStarting ?
-          <GameHandlerer setGameStarting = { setGameStarting }  setPlayers = { setPlayers }></GameHandlerer> :
+          <GameHandlerer setGameStarting = { setGameStarting }  setPlayersCB = { setPlayers }></GameHandlerer> :
           <DashBoard players = { players }></DashBoard>
         }
       </div>
