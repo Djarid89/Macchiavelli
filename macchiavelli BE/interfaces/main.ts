@@ -1,10 +1,3 @@
-import { CCard, Combination } from "../class/main";
-
-
-export interface IPlayer {
-  name: string;
-}
-
 export enum Seed {
   Hearts = 0,
   Tiles,

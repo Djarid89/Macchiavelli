@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
+import { Player } from '../game-handlerer/class/game-handler';
 import { CCard } from './components/card/class/Card';
 import { Combination } from './components/combinations/class/Combinations';
 import { Combinations } from './components/combinations/Combinations';
-import { IPlayer } from './components/combinations/interfaces/Combinations';
 import { Deck } from './components/deck/Deck';
 import { Hand } from './components/Hand/Hand';
 import styles from './Dashboard.module.scss';
 
 interface Props {
-  players: IPlayer[];
+  players: Player[];
 }
 
 export const DashBoard: React.FC<Props> = ({ players }: Props) => {
@@ -90,7 +90,7 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     <>
       <div className={ styles.dashboard }>
         <div className={ styles.dashboardHeader }>
-          { players.map((player: IPlayer, index: number) => <span key={index}>{player.name}</span>) }
+          { players.map((player: Player, index: number) => <span key={index}>{player.name}</span>) }
         </div>
         <div className={ styles.dashboardContainer } onDrop={ (e: any) => handleThrowDown(e) } onDragOver={ handleDroppable } onDragEnter={ handleDroppable }>
           <Combinations combinations={ combinations }

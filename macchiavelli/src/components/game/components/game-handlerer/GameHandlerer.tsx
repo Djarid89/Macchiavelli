@@ -1,43 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { IPlayer } from '../dashboard/components/combinations/interfaces/Combinations';
 import styles from './GameHandlerer.module.scss';
 import io from 'socket.io-client';
-import { Client } from './interfaces/game-handler';
+import { Player } from './class/game-handler';
 
 interface Props {
   setGameStarting(value: boolean): void;
-  setPlayersCB(players: IPlayer[]): void;
+  setPlayersCB(players: Player[]): void;
 }
 
 export const GameHandlerer: React.FC<Props> = ({ setGameStarting, setPlayersCB }: Props) => {
-  const [player, setPlayer] = useState<IPlayer>();
+  const [player, setPlayer] = useState<Player>();
   const [players, setPlayers] = useState<string[]>([]);
   const socket = io('http://localhost:8000');
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('connected');
-    });
+    socket.on('connect', () =>  console.log('connected'));
 
-    socket.on('disconnect', () => {
-      console.log('disConnected');
-    });
+    socket.on('disconnect', () => console.log('disconnected'));
 
-    socket.on('setPlayer', (client: Client) => {
-      setPlayer(client)
-    });
-
-    setInterval(() => {
-      socket.emit('getPlayersName')
-    },5000);
-    socket.on('setPlayersName', (playersName: string[]) => {
-      setPlayers(playersName)
-    });
+    setInterval(() => socket.emit('getPlayersName'),5000);
+    socket.on('setPlayersName', (playersName: string[]) => setPlayers(playersName));
 
     return () => {
       socket.off('connect');
       socket.off('disconnect');
-      socket.off('setPlayer');
+      socket.off('setPlayersName');
     };
   }, []);
 
@@ -45,7 +32,9 @@ export const GameHandlerer: React.FC<Props> = ({ setGameStarting, setPlayersCB }
     if(!player?.name) {
       return;
     }
-    socket.emit('setPlayerId', new Client(0, player.name));
+
+    socket.once('setPlayerId', (id: number) => setPlayer({ id, name: player?.name || '' }));
+    socket.emit('setPlayer', player.name);
   }
 
   function startGame(): void {

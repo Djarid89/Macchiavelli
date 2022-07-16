@@ -1,13 +1,3 @@
-export class Client {
-  id: number;
-  name: string;
-
-  constructor(id: number, name: string) {
-    this.id = id;
-    this.name = name;
-  }
-}
-
 export interface ServerToClientEvents {
   // noArg: () => void;
   // basicEmit: (a: number, b: string, c: Buffer) => void; a is inferred as number, b as string and c as buffer

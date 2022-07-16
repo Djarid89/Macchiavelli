@@ -1,6 +1,6 @@
 import { Seed } from "../interfaces/main";
 
-export class Client {
+export class Player {
   id: number;
   name: string;
 
