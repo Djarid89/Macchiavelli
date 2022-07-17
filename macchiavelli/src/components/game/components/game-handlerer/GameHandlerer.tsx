@@ -1,29 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import styles from './GameHandlerer.module.scss';
-import io from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import { Player } from './class/game-handler';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 interface Props {
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   setGameStarting(value: boolean): void;
   setPlayersCB(players: Player[]): void;
 }
 
-export const GameHandlerer: React.FC<Props> = ({ setGameStarting, setPlayersCB }: Props) => {
+export const GameHandlerer: React.FC<Props> = ({ socket, setGameStarting, setPlayersCB }: Props) => {
   const [player, setPlayer] = useState<Player>();
   const [players, setPlayers] = useState<string[]>([]);
-  const socket = io('http://localhost:8000');
 
   useEffect(() => {
-    socket.on('connect', () =>  console.log('connected'));
-
-    socket.on('disconnect', () => console.log('disconnected'));
-
-    setInterval(() => socket.emit('getPlayersName'),5000);
+    setInterval(() => socket.emit('getPlayersName'), 1000);
     socket.on('setPlayersName', (playersName: string[]) => setPlayers(playersName));
 
     return () => {
-      socket.off('connect');
-      socket.off('disconnect');
       socket.off('setPlayersName');
     };
   }, []);

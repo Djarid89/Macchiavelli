@@ -9,7 +9,7 @@ import { Player } from './class/main';
 const app = express();
 app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(morgan('combined'));
-const clients: Player[] = [];
+const players: Player[] = [];
 
 const server = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server, {
@@ -18,20 +18,20 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
 
 io.on('connection', (socket: Socket) => {
   socket.on('setPlayer', (playerName: string) => {
-    let validId = false;
-    let random = Math.floor(Math.random() * 100000) + 1;
-    while(!validId) {
-      random = Math.floor(Math.random() * 100000) + 1;
-      if(clients.every((client: Player) => client.id !== random)) {
-        validId = true;
-      }
-    }
-    clients.push(new Player(random, playerName));
+    const random = Math.floor(Math.random() * 100000) + 1;
+    players.push(new Player(socket.id, playerName));
     socket.emit('setPlayerId', random);
   });
 
   socket.on('getPlayersName', () => {
-    socket.emit('setPlayersName', clients.map((client: Player) => client.name))
+    socket.emit('setPlayersName', players.map((client: Player) => client.name));
+  });
+
+  socket.on("disconnect", () => {
+    const index = players.findIndex((player: Player) => player.id === socket.id)
+    if(index !== -1) {
+      players.splice(index, 1);
+    }
   });
 });
 
