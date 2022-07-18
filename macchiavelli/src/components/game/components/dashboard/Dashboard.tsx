@@ -120,7 +120,7 @@ export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPla
   const handleSetCards = (_cards: CCard[]) => {
     const cp = Player.get(players, playerName);
     cp.cards = [..._cards];
-    setPlayer(cp);
+    setPlayer(cp.copyPlayer());
   }
 
   return (
@@ -135,7 +135,7 @@ export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPla
                         attachCombination={ (combinationToAttach: Combination) => handleAttachCombination(combinationToAttach) }
                         unsetCombination={ () => setCombination(new Combination([])) }></Combinations>
           <span className={ styles.deckContainer }>
-            <Deck socket={ socket } setPlayers={ setPlayers }></Deck>
+            <Deck socket={ socket } setCards={ handleSetCards }></Deck>
           </span>
         </div>
         <div className={ styles.dashboardFooter }>

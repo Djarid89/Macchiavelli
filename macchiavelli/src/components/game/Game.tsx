@@ -10,16 +10,12 @@ export const Game: React.FC = () => {
   const [playerName, setPlayerName] = useState<string>('');
   const socket = io('http://localhost:8000');
 
-  const asd = (asd: string): void => {
-    setPlayerName(asd);
-  }
-
   return (
     <div className={styles.game}>
       {
         !players.length
         ?
-          <GameHandlerer socket={ socket } _setPlayers={ setPlayers } _setPlayersName={ asd }></GameHandlerer>
+          <GameHandlerer socket={ socket } _setPlayers={ setPlayers } _setPlayersName={ setPlayerName }></GameHandlerer>
         :
           <DashBoard  socket={ socket } players={ players } playerName={ playerName } setPlayers={ setPlayers }></DashBoard>
       }

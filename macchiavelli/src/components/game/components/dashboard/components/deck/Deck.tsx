@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { Player } from '../../../game-handlerer/class/game-handler';
+import { CCard } from '../card/class/Card';
 import styles from './Deck.module.scss';
 
 function importDeck(r: any) {
@@ -13,12 +13,12 @@ function importDeck(r: any) {
 
 interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-  setPlayers(players: Player[]): void;
+  setCards(cards: CCard[]): void;
 }
-export const Deck: React.FC<Props> = ({ socket, setPlayers }: Props) => {
+export const Deck: React.FC<Props> = ({ socket, setCards }: Props) => {
   useEffect(() => {
-    socket.on('getCard', (_players: Player[]) => {
-      setPlayers(_players);
+    socket.on('getCards', (cards: CCard[]) => {
+      setCards(cards);
     });
 
     return () => {

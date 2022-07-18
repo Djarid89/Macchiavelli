@@ -43,8 +43,7 @@ io.on('connection', (socket: Socket) => {
     if(playerWithTurnOn) {
       playerWithTurnOn.cards.push(deck.getCard());
     }
-    socket.emit('getCard', players);
-    socket.emit('setNextPlayer');
+    socket.emit('getCards', playerWithTurnOn.cards);
   });
 
   socket.on('setCombinations', (combinationsForUpdate: Combination[]) => {
