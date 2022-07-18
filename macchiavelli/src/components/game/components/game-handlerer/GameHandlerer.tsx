@@ -6,53 +6,62 @@ import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-  setGameStarting(value: boolean): void;
-  setPlayersCB(players: Player[]): void;
+  _setPlayers(players: Player[]): void;
+  _setPlayersName(playerName: string): void;
 }
 
-export const GameHandlerer: React.FC<Props> = ({ socket, setGameStarting, setPlayersCB }: Props) => {
+export const GameHandlerer: React.FC<Props> = ({ socket, _setPlayers, _setPlayersName }: Props) => {
   const [player, setPlayer] = useState<Player>();
-  const [players, setPlayers] = useState<string[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [subscribed, setSubscribed] = useState<boolean>(false);
 
   useEffect(() => {
-    setInterval(() => socket.emit('getPlayersName'), 1000);
-    socket.on('setPlayersName', (playersName: string[]) => setPlayers(playersName));
+    socket.on('setPlayer', (_player: Player) => {
+      _setPlayersName(_player?.name || '');
+      setPlayer(_player);
+    });
+    setInterval(() => socket.emit('getPlayers'), 500);
+    socket.on('setPlayers', (_players: Player[]) => {
+      setPlayers(_players);
+    });
+    socket.on('startGame', (_players: Player[]) => {
+      _setPlayers(_players);
+    });
 
     return () => {
-      socket.off('setPlayersName');
+      socket.off('setPlayer');
+      socket.off('setPlayers');
+      socket.off('startGame');
     };
   }, []);
 
-  function addPlayer(): void {
+  function subscribe(): void {
     if(!player?.name) {
       return;
     }
-
-    socket.once('setPlayerId', (id: number) => setPlayer({ id, name: player?.name || '' }));
     socket.emit('setPlayer', player.name);
+    setSubscribed(true);
   }
 
   function startGame(): void {
-    setGameStarting(true);
+    socket.emit('setStartGame');
   }
 
   return(
     <>
       <div className={ styles.gameHandlerer }>
-        {
-          player?.id
-          ?
-          <div>
-            <div>Players:</div>
-            {players.map((playerName: string, index: number) => <div key={index}>{playerName}</div>)}
-          </div>
+          { !subscribed ?
+          <>
+            <div><input type="text" onChange={(event: any) => setPlayer(new Player(event.target.value))} value={player?.name || ''} /></div>
+            <div><button onClick={ subscribe }>Iscriviti alla partita</button></div>
+          </>
           :
-          <div>
-            <div><input type="text" onChange={(event: any) => setPlayer({ id: player?.id || 0, name: event.target.value })} value={player?.name || ''} /></div>
-            <div><button onClick={addPlayer}>Add</button></div>
-            <div><button onClick={startGame}>Gioca</button></div>
-          </div>
+          <>
+            <div>Giocatori iscritti:</div>
+            { players.map((_player: Player, index: number) => <div key={index}>{_player.name}</div>) }
+          </>
         }
+        { player?.isMyTurn ? <div><button onClick={ startGame }>Gioca</button></div> : '' }
       </div>
     </>
   )

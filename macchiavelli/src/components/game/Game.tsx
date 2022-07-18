@@ -7,15 +7,21 @@ import styles from './Game.module.scss';
 
 export const Game: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
-  const [gameStarting, setGameStarting] = useState<boolean>(false);
+  const [playerName, setPlayerName] = useState<string>('');
   const socket = io('http://localhost:8000');
+
+  const asd = (asd: string): void => {
+    setPlayerName(asd);
+  }
 
   return (
     <div className={styles.game}>
       {
-        !gameStarting ?
-        <GameHandlerer socket={socket} setGameStarting = { setGameStarting }  setPlayersCB = { setPlayers }></GameHandlerer> :
-        <DashBoard players = { players }></DashBoard>
+        !players.length
+        ?
+          <GameHandlerer socket={ socket } _setPlayers={ setPlayers } _setPlayersName={ asd }></GameHandlerer>
+        :
+          <DashBoard  socket={ socket } players={ players } playerName={ playerName } setPlayers={ setPlayers }></DashBoard>
       }
     </div>
   );

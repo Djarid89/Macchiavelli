@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { CCard } from '../card/class/Card';
-import { CDeck } from './class/Deck';
+import { Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { Player } from '../../../game-handlerer/class/game-handler';
 import styles from './Deck.module.scss';
-import deckSvg from '../../../../../../assets/deck.svg'
 
 function importDeck(r: any) {
   const result: any = {};
@@ -12,19 +12,27 @@ function importDeck(r: any) {
  const images = importDeck(require.context('../../../../../../assets', false, /\.(png|jpe?g|svg)$/));
 
 interface Props {
-  setCards(cards: CCard[]): void;
-  addCard(cards: CCard): void;
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+  setPlayers(players: Player[]): void;
 }
-export const Deck: React.FC<Props> = ({ setCards, addCard }: Props) => {
-  const [deck] = useState(new CDeck());
-
+export const Deck: React.FC<Props> = ({ socket, setPlayers }: Props) => {
   useEffect(() => {
-    setCards(deck.getCards());
+    socket.on('getCard', (_players: Player[]) => {
+      setPlayers(_players);
+    });
+
+    return () => {
+      socket.off('getCard');
+    };
   }, []);
+
+  const handleAddCard = () => {
+    socket.emit('giveCard');
+  }
 
   return (
     <>
-      <div className={ styles.deck } onClick={ () => addCard(deck.getCard()) }>
+      <div className={ styles.deck } onClick={ handleAddCard }>
         <img src={ images['deck.svg'] } alt='mySvgImage' />
       </div>
     </>

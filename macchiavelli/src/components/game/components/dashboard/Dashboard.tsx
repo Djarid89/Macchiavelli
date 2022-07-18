@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { Player } from '../game-handlerer/class/game-handler';
 import { CCard } from './components/card/class/Card';
 import { Combination } from './components/combinations/class/Combinations';
@@ -8,14 +10,33 @@ import { Hand } from './components/Hand/Hand';
 import styles from './Dashboard.module.scss';
 
 interface Props {
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   players: Player[];
+  playerName: string;
+  setPlayers(players: Player[]): void
 }
 
-export const DashBoard: React.FC<Props> = ({ players }: Props) => {
-  const [cards, setCards] = useState<CCard[]>([]);
+export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPlayers }: Props) => {
+  const [player, setPlayer] = useState(Player.get(players, playerName));
   const [combination, setCombination] = useState<Combination>(new Combination([]));
   const [combinations, setCombinations] = useState<Combination[]>([]);
   let isOnAttach = false;
+
+  useEffect(() => {
+    socket.on('getNextPlayer', (_players: Player[]) => {
+      setPlayers(_players);
+      setPlayer(Player.get(_players, playerName));
+    });
+    socket.on('getCombinations', (_combinations: Combination[]) => {
+      debugger;
+      setCombinations(_combinations);
+    });
+
+    return () => {
+      socket.off('getNextPlayer');
+      socket.off('getCombinations');
+    };
+  }, []);
 
   const handleCombine = (card: CCard): void => {
     let combCards: CCard[] = combination.cards;
@@ -53,8 +74,8 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     combination.cards.forEach((card: CCard) => card.selected = false);
     const newCombinations = combinations.concat([combination.copyCombination()]);
     newCombinations.forEach((comb: Combination) => comb.cards = comb.cards.filter((card: CCard) => !card.selected));
-    setCombinations(newCombinations.filter((comb: Combination) => comb.cards.length));
-    setCards(cards.filter((card: CCard) => !card.selected));
+    socket.emit('setCombinations', newCombinations.filter((comb: Combination) => comb.cards.length))
+    player.cards = (player.cards.filter((card: CCard) => !card.selected));
     combination.cards.forEach((card: CCard) => card.selected = false);
     setCombination(new Combination([]));
   }
@@ -71,14 +92,15 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
         comb.cards = comb.cards.filter((card: CCard) => !card.selected);
       }
     });
-    setCombinations(combinations.filter((comb: Combination) => comb.cards.length));
-    setCards(cards.filter((card: CCard) => !card.selected));
+    socket.emit('setCombinations', combinations.filter((comb: Combination) => comb.cards.length))
+    const cards = Player.get(players, playerName).cards;
+    player.cards = (cards.filter((card: CCard) => !card.selected));
     setCombination(new Combination([]));
   }
 
   const handleOrderCard = (): void => {
-    cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
-    setCards(cards.map((card: CCard) => card));
+    player.cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
+    player.cards = [...player.cards]  // mi sa che non serve...
   }
 
   const handleDroppable = (e:any) => {
@@ -86,11 +108,26 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
     e.stopPropagation();
   }
 
+  const handlePasso = () => {
+    for(const comb of combinations) {
+      if(!comb.isAllCombinable(comb.cards)) {
+        return;
+      }
+    }
+    socket.emit('setNextPlayer');
+  }
+
+  const handleSetCards = (_cards: CCard[]) => {
+    const cp = Player.get(players, playerName);
+    cp.cards = [..._cards];
+    setPlayer(cp);
+  }
+
   return (
     <>
       <div className={ styles.dashboard }>
         <div className={ styles.dashboardHeader }>
-          { players.map((player: Player, index: number) => <span key={index}>{player.name}</span>) }
+          { players.map((_player: Player, index: number) => <span style={{ fontWeight: _player.isMyTurn ? 'bold' : '' }} key={index}>{_player.name}</span>) }
         </div>
         <div className={ styles.dashboardContainer } onDrop={ (e: any) => handleThrowDown(e) } onDragOver={ handleDroppable } onDragEnter={ handleDroppable }>
           <Combinations combinations={ combinations }
@@ -98,7 +135,7 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
                         attachCombination={ (combinationToAttach: Combination) => handleAttachCombination(combinationToAttach) }
                         unsetCombination={ () => setCombination(new Combination([])) }></Combinations>
           <span className={ styles.deckContainer }>
-            <Deck setCards={ setCards } addCard={ (cardToAdd: CCard) => { setCards(cards.concat([cardToAdd])) } }></Deck>
+            <Deck socket={ socket } setPlayers={ setPlayers }></Deck>
           </span>
         </div>
         <div className={ styles.dashboardFooter }>
@@ -106,10 +143,10 @@ export const DashBoard: React.FC<Props> = ({ players }: Props) => {
             <button onClick={ handleOrderCard }>Ordina</button>
           </div>
           <div className={ styles.dashboardHand }>
-            <Hand cards={ cards } setCards={ setCards } combine={ handleCombine }></Hand>
+            <Hand cards={ player.cards } setCards={ handleSetCards } combine={ handleCombine }></Hand>
           </div>
           <div className={ styles.dashboardButtonPass }>
-            <button>Passo</button>
+            <button onClick={ handlePasso }>Passo</button>
           </div>
         </div>
       </div>
