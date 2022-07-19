@@ -4,7 +4,7 @@ import { Server, Socket } from "socket.io";
 import cors = require('cors');
 import morgan = require('morgan');
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from './interfaces/main';
-import { Combination, Deck, Player } from './class/main';
+import { Card, Combination, Deck, Player } from './class/main';
 
 const app = express();
 app.use(cors({ origin: 'http://localhost:3000' }));
@@ -41,14 +41,22 @@ io.on('connection', (socket: Socket) => {
   socket.on('giveCard', () => {
     const playerWithTurnOn = players.find((player: Player) => player.isMyTurn);
     if(playerWithTurnOn) {
-      playerWithTurnOn.cards.push(deck.getCard());
+      const newCard = deck.getCard();
+      playerWithTurnOn.cards.push(newCard);
+      socket.emit('getCard', newCard);
     }
-    socket.emit('getCards', playerWithTurnOn.cards);
   });
 
   socket.on('setCombinations', (combinationsForUpdate: Combination[]) => {
     combinations = combinationsForUpdate;
     io.emit('getCombinations', combinations);
+  });
+
+  socket.on('upgradeCards', (cards: Card[]) => {
+    const playerWithTurnOn = players.find((player: Player) => player.isMyTurn);
+    if(playerWithTurnOn) {
+      playerWithTurnOn.cards = cards;
+    }
   });
 
   socket.on('setNextPlayer', () => {

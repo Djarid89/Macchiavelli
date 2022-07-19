@@ -6,12 +6,13 @@ import styles from './Combinations.module.scss';
 
 interface Props {
   combinations: Combination[];
+  readOnly: boolean;
   attachCombination(combination: Combination): void;
   combine(card: CCard, combination: Combination): void;
   unsetCombination(): void;
 }
 
-export const Combinations: React.FC<Props> = ({ combinations, attachCombination, combine, unsetCombination }: Props) => {
+export const Combinations: React.FC<Props> = ({ combinations, readOnly, attachCombination, combine, unsetCombination }: Props) => {
   const [isCombinationSelected, setIsCombinationSelected] = useState(false);
 
   const handleDragEnd = (e: any, combination: Combination) => {
@@ -46,7 +47,8 @@ export const Combinations: React.FC<Props> = ({ combinations, attachCombination,
             {
               combination.cards.map((card: CCard, index2: number) =>
                 <Card key={ index2 }
-                      isCombinationSelected={isCombinationSelected}
+                      isCombinationSelected={ isCombinationSelected }
+                      readOnly={ readOnly }
                       card={ card }
                       index={ index2 }
                       attachCombination={ () => attachCombination(combination) }

@@ -13,6 +13,7 @@ interface Props {
   card: CCard;
   index: number;
   isCombinationSelected?: boolean;
+  readOnly?: boolean;
   moveCardFrom?(toIndex: number): void;
   moveCardTo?(fromIndex: number): void;
   attachCombination?(): void;
@@ -22,6 +23,7 @@ interface Props {
 export const Card: React.FC<Props> = ({ card,
                                         index,
                                         isCombinationSelected,
+                                        readOnly,
                                         moveCardFrom,
                                         moveCardTo,
                                         attachCombination,
@@ -30,7 +32,7 @@ export const Card: React.FC<Props> = ({ card,
     if(isCombinationSelected) {
       return;
     }
-    if(combine && e.altKey && !card.selected) {
+    if(combine && e.altKey && !card.selected && !readOnly) {
       combine(card);
     }
     e.stopPropagation();
@@ -44,7 +46,7 @@ export const Card: React.FC<Props> = ({ card,
     if(moveCardFrom) {
       moveCardFrom(index);
     }
-    if(combine && !card.selected) {
+    if(combine && !card.selected && !readOnly) {
       combine(card);
     }
   }
@@ -55,7 +57,7 @@ export const Card: React.FC<Props> = ({ card,
     }
     if(moveCardTo) {
       moveCardTo(index);
-    } else if(attachCombination) {
+    } else if(attachCombination && !readOnly) {
       attachCombination();
     }
   }
@@ -64,7 +66,7 @@ export const Card: React.FC<Props> = ({ card,
     if(isCombinationSelected) {
       return;
     }
-    if(combine) {
+    if(combine && !readOnly) {
       combine(card);
     }
   }

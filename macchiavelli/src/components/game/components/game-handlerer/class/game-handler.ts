@@ -11,11 +11,10 @@ export class Player {
     this.isMyTurn = isMyTurn;
   }
 
-  static get(players: Player[], playerName: string): Player {
-    return players.find((player: Player) => player.name === playerName) as Player;
-  }
-
-  copyPlayer(): Player {
-    return new Player(this.name, this.cards, this.isMyTurn);
+  static get(players: Player[], playerName: string): Player | undefined {
+    if(!players) {
+      return;
+    }
+    return players.find((player: Player) => player.name === playerName);
   }
 }

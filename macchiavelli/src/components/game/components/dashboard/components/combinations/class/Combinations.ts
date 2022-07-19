@@ -24,6 +24,15 @@ export class Combination {
     return newCombination;
   }
 
+  static generateFromProps(combination: Combination): Combination {
+    const newCombination = new Combination(combination.cards.map((card: CCard) => card));
+    newCombination.id = combination.id;
+    newCombination.positionTop = combination.positionTop;
+    newCombination.positionLeft = combination.positionLeft;
+    newCombination.zIndex = combination.zIndex;
+    return newCombination;
+  }
+
   isCardCombinable(card: CCard, cards?: CCard[]): boolean {
     const cardsToCheck = cards || this.cards;
     if(!cardsToCheck.length) {

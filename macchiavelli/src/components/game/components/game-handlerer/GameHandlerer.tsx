@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './GameHandlerer.module.scss';
 import { Socket } from 'socket.io-client';
 import { Player } from './class/game-handler';
@@ -6,27 +6,20 @@ import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-  _setPlayers(players: Player[]): void;
-  _setPlayersName(playerName: string): void;
+  _setPlayers(players: Player[], name: string): void;
 }
 
-export const GameHandlerer: React.FC<Props> = ({ socket, _setPlayers, _setPlayersName }: Props) => {
-  const [player, setPlayer] = useState<Player>();
+export const GameHandlerer: React.FC<Props> = ({ socket, _setPlayers }: Props) => {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [playerName, setPlayerName] = useState<string>('');
   const [subscribed, setSubscribed] = useState<boolean>(false);
+  const player = useRef<Player>();
 
   useEffect(() => {
-    socket.on('setPlayer', (_player: Player) => {
-      _setPlayersName(_player?.name || '');
-      setPlayer(_player);
-    });
+    socket.on('setPlayer', (_player: Player) => player.current = _player);
     setInterval(() => socket.emit('getPlayers'), 500);
-    socket.on('setPlayers', (_players: Player[]) => {
-      setPlayers(_players);
-    });
-    socket.on('startGame', (_players: Player[]) => {
-      _setPlayers(_players);
-    });
+    socket.on('setPlayers', (_players: Player[]) => setPlayers(_players));
+    socket.on('startGame', (_players: Player[]) => _setPlayers(_players, player?.current?.name || ''));
 
     return () => {
       socket.off('setPlayer');
@@ -36,10 +29,10 @@ export const GameHandlerer: React.FC<Props> = ({ socket, _setPlayers, _setPlayer
   }, []);
 
   function subscribe(): void {
-    if(!player?.name) {
+    if(!playerName) {
       return;
     }
-    socket.emit('setPlayer', player.name);
+    socket.emit('setPlayer', playerName);
     setSubscribed(true);
   }
 
@@ -52,7 +45,7 @@ export const GameHandlerer: React.FC<Props> = ({ socket, _setPlayers, _setPlayer
       <div className={ styles.gameHandlerer }>
           { !subscribed ?
           <>
-            <div><input type="text" onChange={(event: any) => setPlayer(new Player(event.target.value))} value={player?.name || ''} /></div>
+            <div><input type="text" onChange={(event: any) => setPlayerName(event.target.value)} value={playerName || ''} /></div>
             <div><button onClick={ subscribe }>Iscriviti alla partita</button></div>
           </>
           :
@@ -61,7 +54,7 @@ export const GameHandlerer: React.FC<Props> = ({ socket, _setPlayers, _setPlayer
             { players.map((_player: Player, index: number) => <div key={index}>{_player.name}</div>) }
           </>
         }
-        { player?.isMyTurn ? <div><button onClick={ startGame }>Gioca</button></div> : '' }
+        { player?.current?.isMyTurn ? <div><button onClick={ startGame }>Gioca</button></div> : '' }
       </div>
     </>
   )

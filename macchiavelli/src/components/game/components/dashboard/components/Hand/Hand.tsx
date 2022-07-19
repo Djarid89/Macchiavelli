@@ -4,23 +4,16 @@ import { CCard } from '../card/class/Card';
 
 interface Props {
   cards: CCard[];
-  setCards(cards: CCard[]): void;
+  readOnly: boolean;
+  moveCards(form: number, to: number): void;
   combine(card: CCard): void;
 }
 
-export const Hand: React.FC<Props> = ({ cards, setCards, combine }: Props) => {
+export const Hand: React.FC<Props> = ({ cards, readOnly, moveCards, combine }: Props) => {
   const [from, setFrom] = useState(0);
 
-  const doMove = (swipeTo: number): void => {
-    const card = cards[from];
-    if(!card) {
-      return;
-    }
-
-    const cardToMove = new CCard(card.id, card.number, card.seed, card.selected);
-    cards.splice(from, 1);
-    cards.splice(swipeTo, 0, cardToMove);
-    setCards(cards.map((c: CCard) => c));
+  const doMove = (to: number): void => {
+    moveCards(from, to);
   }
 
   return (
@@ -28,6 +21,7 @@ export const Hand: React.FC<Props> = ({ cards, setCards, combine }: Props) => {
         {
         cards.map((card: CCard, index: number) =>
           <Card key={ index + 1 }
+                readOnly={readOnly}
                 card={ card }
                 index={ index }
                 moveCardFrom= { setFrom }

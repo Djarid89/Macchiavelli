@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { Player } from '../game-handlerer/class/game-handler';
@@ -12,25 +12,28 @@ import styles from './Dashboard.module.scss';
 interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   players: Player[];
-  playerName: string;
+  player: Player;
   setPlayers(players: Player[]): void
+  setPlayer(player: Player): void;
 }
 
-export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPlayers }: Props) => {
-  const [player, setPlayer] = useState(Player.get(players, playerName));
+export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers, setPlayer }: Props) => {
   const [combination, setCombination] = useState<Combination>(new Combination([]));
   const [combinations, setCombinations] = useState<Combination[]>([]);
+  const [, updateState] = useState<{}>();
+  const forceUpdate = useCallback(() => updateState({}), []);
   let isOnAttach = false;
+  const [hasThowCards, setHasThowCards] = useState(false);
 
   useEffect(() => {
     socket.on('getNextPlayer', (_players: Player[]) => {
       setPlayers(_players);
-      setPlayer(Player.get(_players, playerName));
+      const _player = _players.find((pl: Player) => pl.name === player.name);
+      if(_player) {
+        setPlayer(_player);
+      }
     });
-    socket.on('getCombinations', (_combinations: Combination[]) => {
-      debugger;
-      setCombinations(_combinations);
-    });
+    socket.on('getCombinations', (_combinations: Combination[]) => setCombinations(_combinations.map((comb: Combination) => Combination.generateFromProps(comb))));
 
     return () => {
       socket.off('getNextPlayer');
@@ -74,10 +77,12 @@ export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPla
     combination.cards.forEach((card: CCard) => card.selected = false);
     const newCombinations = combinations.concat([combination.copyCombination()]);
     newCombinations.forEach((comb: Combination) => comb.cards = comb.cards.filter((card: CCard) => !card.selected));
-    socket.emit('setCombinations', newCombinations.filter((comb: Combination) => comb.cards.length))
+    socket.emit('setCombinations', newCombinations.filter((comb: Combination) => comb.cards.length));
     player.cards = (player.cards.filter((card: CCard) => !card.selected));
+    socket.emit('upgradeCards', player.cards);
     combination.cards.forEach((card: CCard) => card.selected = false);
     setCombination(new Combination([]));
+    setHasThowCards(true);
   }
 
   const handleAttachCombination = (combinationToModify: Combination): void => {
@@ -93,14 +98,15 @@ export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPla
       }
     });
     socket.emit('setCombinations', combinations.filter((comb: Combination) => comb.cards.length))
-    const cards = Player.get(players, playerName).cards;
-    player.cards = (cards.filter((card: CCard) => !card.selected));
+    player.cards = (player.cards.filter((card: CCard) => !card.selected));
+    socket.emit('upgradeCards', player.cards);
     setCombination(new Combination([]));
+    setHasThowCards(true);
   }
 
   const handleOrderCard = (): void => {
     player.cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
-    player.cards = [...player.cards]  // mi sa che non serve...
+    forceUpdate();
   }
 
   const handleDroppable = (e:any) => {
@@ -114,13 +120,25 @@ export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPla
         return;
       }
     }
+    setHasThowCards(false);
     socket.emit('setNextPlayer');
   }
 
-  const handleSetCards = (_cards: CCard[]) => {
-    const cp = Player.get(players, playerName);
-    cp.cards = [..._cards];
-    setPlayer(cp.copyPlayer());
+  const handleGetCardFromDeck = (card: CCard): void => {
+    setHasThowCards(false);
+    player.cards.push({ ...card });
+  }
+
+  const handleSetCards = (from: number, to: number): void => {
+    const card = player.cards[from];
+    if(!card) {
+      return;
+    }
+
+    const cardToMove = new CCard(card.id, card.number, card.seed, card.selected);
+    player.cards.splice(from, 1);
+    player.cards.splice(to, 0, cardToMove);
+    forceUpdate();
   }
 
   return (
@@ -132,10 +150,11 @@ export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPla
         <div className={ styles.dashboardContainer } onDrop={ (e: any) => handleThrowDown(e) } onDragOver={ handleDroppable } onDragEnter={ handleDroppable }>
           <Combinations combinations={ combinations }
                         combine={ handleCombine }
+                        readOnly={ !player.isMyTurn }
                         attachCombination={ (combinationToAttach: Combination) => handleAttachCombination(combinationToAttach) }
                         unsetCombination={ () => setCombination(new Combination([])) }></Combinations>
           <span className={ styles.deckContainer }>
-            <Deck socket={ socket } setCards={ handleSetCards }></Deck>
+            <Deck socket={ socket } addCard={ handleGetCardFromDeck } readOnly={ !player.isMyTurn || hasThowCards }></Deck>
           </span>
         </div>
         <div className={ styles.dashboardFooter }>
@@ -143,10 +162,10 @@ export const DashBoard: React.FC<Props> = ({ socket, players, playerName, setPla
             <button onClick={ handleOrderCard }>Ordina</button>
           </div>
           <div className={ styles.dashboardHand }>
-            <Hand cards={ player.cards } setCards={ handleSetCards } combine={ handleCombine }></Hand>
+            <Hand cards={ player.cards } readOnly={ !player.isMyTurn } moveCards={ handleSetCards } combine={ handleCombine }></Hand>
           </div>
           <div className={ styles.dashboardButtonPass }>
-            <button onClick={ handlePasso }>Passo</button>
+            { hasThowCards && player.isMyTurn ? <button onClick={ handlePasso }>Passo</button> : '' }
           </div>
         </div>
       </div>

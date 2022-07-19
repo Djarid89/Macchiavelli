@@ -13,12 +13,14 @@ function importDeck(r: any) {
 
 interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-  setCards(cards: CCard[]): void;
+  readOnly: boolean;
+  addCard(cards: CCard): void;
 }
-export const Deck: React.FC<Props> = ({ socket, setCards }: Props) => {
+export const Deck: React.FC<Props> = ({ socket, readOnly, addCard }: Props) => {
   useEffect(() => {
-    socket.on('getCards', (cards: CCard[]) => {
-      setCards(cards);
+    socket.on('getCard', (card: CCard) => {
+      addCard(card);
+      socket.emit('setNextPlayer');
     });
 
     return () => {
@@ -26,13 +28,16 @@ export const Deck: React.FC<Props> = ({ socket, setCards }: Props) => {
     };
   }, []);
 
-  const handleAddCard = () => {
+  const handleOnClick = (): void => {
+    if(readOnly) {
+      return;
+    }
     socket.emit('giveCard');
   }
 
   return (
     <>
-      <div className={ styles.deck } onClick={ handleAddCard }>
+      <div className={ styles.deck } onClick={ handleOnClick }>
         <img src={ images['deck.svg'] } alt='mySvgImage' />
       </div>
     </>
