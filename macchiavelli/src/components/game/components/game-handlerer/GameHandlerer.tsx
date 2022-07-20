@@ -6,7 +6,7 @@ import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-  _setPlayers(players: Player[], name: string): void;
+  _setPlayers(players: Player[], id: number): void;
 }
 
 export const GameHandlerer: React.FC<Props> = ({ socket, _setPlayers }: Props) => {
@@ -19,7 +19,7 @@ export const GameHandlerer: React.FC<Props> = ({ socket, _setPlayers }: Props) =
     socket.on('setPlayer', (_player: Player) => player.current = _player);
     setInterval(() => socket.emit('getPlayers'), 500);
     socket.on('setPlayers', (_players: Player[]) => setPlayers(_players));
-    socket.on('startGame', (_players: Player[]) => _setPlayers(_players, player?.current?.name || ''));
+    socket.on('startGame', (_players: Player[]) => _setPlayers(_players, player?.current?.id || 0));
 
     return () => {
       socket.off('setPlayer');

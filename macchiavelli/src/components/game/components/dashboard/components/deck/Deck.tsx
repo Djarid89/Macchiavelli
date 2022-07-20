@@ -14,14 +14,12 @@ function importDeck(r: any) {
 interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   readOnly: boolean;
-  addCard(cards: CCard): void;
+  playerId: number;
+  getCardFromDeck(card: CCard): void;
 }
-export const Deck: React.FC<Props> = ({ socket, readOnly, addCard }: Props) => {
+export const Deck: React.FC<Props> = ({ socket, readOnly, playerId, getCardFromDeck }: Props) => {
   useEffect(() => {
-    socket.on('getCard', (card: CCard) => {
-      addCard(card);
-      socket.emit('setNextPlayer');
-    });
+    socket.on('getCard', (card: CCard) => getCardFromDeck(card));
 
     return () => {
       socket.off('getCard');
@@ -32,7 +30,7 @@ export const Deck: React.FC<Props> = ({ socket, readOnly, addCard }: Props) => {
     if(readOnly) {
       return;
     }
-    socket.emit('giveCard');
+    socket.emit('giveCard', playerId);
   }
 
   return (

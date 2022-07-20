@@ -4,7 +4,7 @@ import { Server, Socket } from "socket.io";
 import cors = require('cors');
 import morgan = require('morgan');
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from './interfaces/main';
-import { Card, Combination, Deck, Player } from './class/main';
+import { Combination, Deck, Player } from './class/main';
 
 const app = express();
 app.use(cors({ origin: 'http://localhost:3000' }));
@@ -20,29 +20,37 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
 
 io.on('connection', (socket: Socket) => {
   socket.on('setPlayer', (playerName: string) => {
-    const newPlayer = new Player(socket.id, playerName, [], players.length === 0);
+    let validId = false;
+    let random = Math.floor(Math.random() * 100000) + 1;
+    while(!validId) {
+      random = Math.floor(Math.random() * 100000) + 1;
+      if(players.every((player: Player) => player.id !== random)) {
+        validId = true;
+      }
+    }
+    const newPlayer = new Player(random, playerName, [], players.length === 0);
     const count = players.reduce((sum: number, player: Player) => player.name === newPlayer.name ? sum + 1 : sum, 0);
     if(count) {
       newPlayer.name = `${newPlayer.name}_${count}`;
     }
     players.push(newPlayer);
-    socket.emit('setPlayer', newPlayer.toIPlayer());
+    socket.emit('setPlayer', newPlayer);
   });
 
   socket.on('getPlayers', () => {
-    socket.emit('setPlayers', players.map((player: Player) => player.toIPlayer()));
+    socket.emit('setPlayers', players);
   });
 
   socket.on('setStartGame', () => {
     players.forEach((player: Player) => player.cards = deck.getCards());
-    io.emit('startGame', players.map((player: Player) => player.toIPlayer()));
+    io.emit('startGame', players);
   });
 
-  socket.on('giveCard', () => {
-    const playerWithTurnOn = players.find((player: Player) => player.isMyTurn);
-    if(playerWithTurnOn) {
+  socket.on('giveCard', (idPlayer: number) => {
+    const player = players.find((_player: Player) => _player.id === idPlayer);
+    if(player) {
       const newCard = deck.getCard();
-      playerWithTurnOn.cards.push(newCard);
+      player.cards.push(newCard);
       socket.emit('getCard', newCard);
     }
   });
@@ -52,31 +60,30 @@ io.on('connection', (socket: Socket) => {
     io.emit('getCombinations', combinations);
   });
 
-  socket.on('upgradeCards', (cards: Card[]) => {
-    const playerWithTurnOn = players.find((player: Player) => player.isMyTurn);
-    if(playerWithTurnOn) {
-      playerWithTurnOn.cards = cards;
+  socket.on('upgradeCards', (_player: Player) => {
+    const player = players.find((pl: Player) => pl.id === _player.id);
+    if(player) {
+      player.cards = _player.cards;
     }
   });
 
-  socket.on('setNextPlayer', () => {
-    const playerWithTurnOnIndex = players.findIndex((player: Player) => player.isMyTurn);
-    if(playerWithTurnOnIndex !== -1) {
-      players[playerWithTurnOnIndex].isMyTurn = false;
-      if(playerWithTurnOnIndex === players.length - 1) {
+  socket.on('setNextPlayer', (_player: Player) => {
+    const index = players.findIndex((pl: Player) => pl.id === _player.id);
+    if(index !== -1) {
+      const player = players[index];
+      player.cards = _player.cards;
+      player.isMyTurn = false;
+      if(index === players.length - 1) {
         players[0].isMyTurn = true
       } else {
-        players[playerWithTurnOnIndex + 1].isMyTurn = true
+        players[index + 1].isMyTurn = true
       }
-      io.emit('getNextPlayer', players.map((player: Player) => player.toIPlayer()));
+      io.emit('getNextPlayer', players);
     }
   });
 
   socket.on("disconnect", () => {
-    const index = players.findIndex((player: Player) => player.id === socket.id)
-    if(index !== -1) {
-      players.splice(index, 1);
-    }
+    console.log(socket);
   });
 });
 

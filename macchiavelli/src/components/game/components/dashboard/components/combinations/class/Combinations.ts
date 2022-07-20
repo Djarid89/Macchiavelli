@@ -6,6 +6,7 @@ export class Combination {
   positionTop: number;
   positionLeft: number;
   zIndex: number;
+  isDragged: boolean;
 
   constructor(cards: CCard[]) {
     this.id = 0;
@@ -13,6 +14,7 @@ export class Combination {
     this.positionTop = 0;
     this.positionLeft = 0;
     this.zIndex = 0;
+    this.isDragged = false;
   }
 
   copyCombination(): Combination {
@@ -21,6 +23,7 @@ export class Combination {
     newCombination.positionTop = this.positionTop;
     newCombination.positionLeft = this.positionLeft;
     newCombination.zIndex = this.zIndex;
+    newCombination.isDragged = this.isDragged;
     return newCombination;
   }
 

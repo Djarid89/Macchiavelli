@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { Player } from '../game-handlerer/class/game-handler';
@@ -24,16 +24,20 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
   const forceUpdate = useCallback(() => updateState({}), []);
   let isOnAttach = false;
   const [hasThowCards, setHasThowCards] = useState(false);
+  const cardsUpdated = useRef(player.cards);
+  const draggedCombination = useRef<Combination>();
 
   useEffect(() => {
     socket.on('getNextPlayer', (_players: Player[]) => {
       setPlayers(_players);
-      const _player = _players.find((pl: Player) => pl.name === player.name);
+      const _player = _players.find((pl: Player) => pl.id === player.id);
       if(_player) {
         setPlayer(_player);
       }
     });
-    socket.on('getCombinations', (_combinations: Combination[]) => setCombinations(_combinations.map((comb: Combination) => Combination.generateFromProps(comb))));
+    socket.on('getCombinations', (_combinations: Combination[]) => {
+      setCombinations(_combinations.map((comb: Combination) => Combination.generateFromProps(comb)));
+    });
 
     return () => {
       socket.off('getNextPlayer');
@@ -68,20 +72,29 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
       return;
     }
 
+    const comb = draggedCombination.current || combination;
     if(e) {
-      combination.positionTop = e.clientY - e.target.offsetTop - 125;
-      combination.positionLeft = e.clientX - e.target.offsetLeft;
+      comb.positionTop = e.clientY - e.target.offsetTop - 125;
+      comb.positionLeft = e.clientX - e.target.offsetLeft;
     }
-    combination.cards = Combination.orderCards(combination.cards);
-    combination.id = combinations.length + 1;
-    combination.cards.forEach((card: CCard) => card.selected = false);
-    const newCombinations = combinations.concat([combination.copyCombination()]);
-    newCombinations.forEach((comb: Combination) => comb.cards = comb.cards.filter((card: CCard) => !card.selected));
-    socket.emit('setCombinations', newCombinations.filter((comb: Combination) => comb.cards.length));
+    if(draggedCombination.current) {
+      draggedCombination.current.isDragged = false;
+      const draggedCombIndex = combinations.findIndex((_comb: Combination) => _comb.id === draggedCombination.current?.id);
+      if(draggedCombIndex !== -1) {
+        combinations.splice(draggedCombIndex, 1);
+      }
+    }
+    comb.cards = Combination.orderCards(comb.cards);
+    comb.id = combinations.length + 1;
+    comb.cards.forEach((card: CCard) => card.selected = false);
+    const newCombinations = combinations.concat([comb.copyCombination()]);
+    newCombinations.forEach((_comb: Combination) => _comb.cards = _comb.cards.filter((card: CCard) => !card.selected));
+    socket.emit('setCombinations', newCombinations.filter((_comb: Combination) => _comb.cards.length));
     player.cards = (player.cards.filter((card: CCard) => !card.selected));
-    socket.emit('upgradeCards', player.cards);
-    combination.cards.forEach((card: CCard) => card.selected = false);
+    cardsUpdated.current = [...player.cards];
+    comb.cards.forEach((card: CCard) => card.selected = false);
     setCombination(new Combination([]));
+    draggedCombination.current = undefined;
     setHasThowCards(true);
   }
 
@@ -98,14 +111,16 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
       }
     });
     socket.emit('setCombinations', combinations.filter((comb: Combination) => comb.cards.length))
-    player.cards = (player.cards.filter((card: CCard) => !card.selected));
-    socket.emit('upgradeCards', player.cards);
+    cardsUpdated.current = (player.cards.filter((card: CCard) => !card.selected));
+    player.cards = [...cardsUpdated.current];
     setCombination(new Combination([]));
     setHasThowCards(true);
   }
 
   const handleOrderCard = (): void => {
-    player.cards.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
+    cardsUpdated.current.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
+    player.cards = [...cardsUpdated.current];
+    socket.emit('upgradeCards', player);
     forceUpdate();
   }
 
@@ -121,24 +136,32 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
       }
     }
     setHasThowCards(false);
-    socket.emit('setNextPlayer');
+    player.cards = [...cardsUpdated.current];
+    socket.emit('setNextPlayer', player);
   }
 
   const handleGetCardFromDeck = (card: CCard): void => {
     setHasThowCards(false);
-    player.cards.push({ ...card });
+    cardsUpdated.current.push({ ...card });
+    player.cards = [...cardsUpdated.current];
+    socket.emit('setNextPlayer', player);
   }
 
   const handleSetCards = (from: number, to: number): void => {
-    const card = player.cards[from];
+    const card = cardsUpdated.current[from];
     if(!card) {
       return;
     }
 
     const cardToMove = new CCard(card.id, card.number, card.seed, card.selected);
-    player.cards.splice(from, 1);
-    player.cards.splice(to, 0, cardToMove);
+    cardsUpdated.current.splice(from, 1);
+    cardsUpdated.current.splice(to, 0, cardToMove);
+    player.cards = [...cardsUpdated.current];
     forceUpdate();
+  }
+
+  const handleOnDraggedCombination = (_combination: Combination): void => {
+    draggedCombination.current = _combination.copyCombination();
   }
 
   return (
@@ -152,9 +175,10 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
                         combine={ handleCombine }
                         readOnly={ !player.isMyTurn }
                         attachCombination={ (combinationToAttach: Combination) => handleAttachCombination(combinationToAttach) }
-                        unsetCombination={ () => setCombination(new Combination([])) }></Combinations>
+                        unsetCombination={ () => setCombination(new Combination([])) }
+                        onDraggedCombination={ handleOnDraggedCombination }></Combinations>
           <span className={ styles.deckContainer }>
-            <Deck socket={ socket } addCard={ handleGetCardFromDeck } readOnly={ !player.isMyTurn || hasThowCards }></Deck>
+            <Deck socket={ socket } playerId={ player.id } getCardFromDeck={ handleGetCardFromDeck } readOnly={ !player.isMyTurn || hasThowCards }></Deck>
           </span>
         </div>
         <div className={ styles.dashboardFooter }>

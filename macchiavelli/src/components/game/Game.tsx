@@ -10,9 +10,9 @@ export const Game: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [player, setPlayer] = useState<Player>();
 
-  const handleSetPlayers = (_players: Player[], name: string): void => {
+  const handleSetPlayers = (_players: Player[], id: number): void => {
     setPlayers(_players);
-    setPlayer(Player.get(_players, name));
+    setPlayer(_players.find((pl: Player) => pl.id === id));
   }
 
   return (

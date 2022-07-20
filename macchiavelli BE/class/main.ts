@@ -1,20 +1,16 @@
 import { IPlayer, Seed } from "../interfaces/main";
 
 export class Player {
-  id: string;
+  id: number;
   name: string;
   isMyTurn: boolean;
   cards: Card[];
 
-  constructor(id: string, name: string, cards: Card[], isMyTurn = false) {
+  constructor(id: number, name: string, cards: Card[], isMyTurn = false) {
     this.id = id;
     this.name = name;
     this.isMyTurn = isMyTurn;
     this.cards = cards;
-  }
-
-  toIPlayer(): IPlayer {
-    return { name: this.name, isMyTurn: this.isMyTurn, cards: this.cards};
   }
 }
 

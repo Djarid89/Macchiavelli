@@ -57,7 +57,7 @@ export const Card: React.FC<Props> = ({ card,
     }
     if(moveCardTo) {
       moveCardTo(index);
-    } else if(attachCombination && !readOnly) {
+    } else if(attachCombination && !readOnly && !e.shiftKey) {
       attachCombination();
     }
   }
