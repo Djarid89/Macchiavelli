@@ -83,6 +83,8 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
       if(draggedCombIndex !== -1) {
         combinations.splice(draggedCombIndex, 1);
       }
+    } else {
+      setHasThowCards(true);
     }
     comb.cards = Combination.orderCards(comb.cards);
     comb.id = combinations.length + 1;
@@ -95,7 +97,6 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
     comb.cards.forEach((card: CCard) => card.selected = false);
     setCombination(new Combination([]));
     draggedCombination.current = undefined;
-    setHasThowCards(true);
   }
 
   const handleAttachCombination = (combinationToModify: Combination): void => {

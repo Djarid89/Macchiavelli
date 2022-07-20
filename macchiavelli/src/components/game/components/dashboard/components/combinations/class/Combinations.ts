@@ -102,6 +102,9 @@ export class Combination {
   }
 
   isAllCombinable(cards: CCard[]): boolean {
+    if(cards.length < 3) {
+      return false;
+    }
     const orderedCards: CCard[] = Combination.orderCards(cards.map((card: CCard) => card));
     const incrementaCards: CCard[] = [];
     for(const card of orderedCards) {
