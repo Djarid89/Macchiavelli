@@ -1,0 +1,11 @@
+$width: 100px;
+
+.card {
+  width: $width;
+  height: 125px;
+  margin-right: calc(($width * -1) + 20px);
+
+  &.selected {
+    transform: translateY(-30px);
+  }
+}
