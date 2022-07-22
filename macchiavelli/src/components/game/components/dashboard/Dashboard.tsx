@@ -13,11 +13,12 @@ interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   players: Player[];
   player: Player;
-  setPlayers(players: Player[]): void
+  setPlayers(players: Player[]): void;
   setPlayer(player: Player): void;
+  reStart(): void;
 }
 
-export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers, setPlayer }: Props) => {
+export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers, setPlayer, reStart }: Props) => {
   const [combination, setCombination] = useState<Combination>(new Combination([]));
   const [combinations, setCombinations] = useState<Combination[]>([]);
   const [, updateState] = useState<{}>();
@@ -136,6 +137,10 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
         return;
       }
     }
+    if(!cardsUpdated.current.length) {
+      reStart();
+      return;
+    }
     setHasThowCards(false);
     player.cards = [...cardsUpdated.current];
     socket.emit('setNextPlayer', player);
@@ -161,10 +166,6 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
     forceUpdate();
   }
 
-  const handleOnDraggedCombination = (_combination: Combination): void => {
-    draggedCombination.current = _combination.copyCombination();
-  }
-
   return (
     <>
       <div className={ styles.dashboard }>
@@ -177,7 +178,7 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
                         readOnly={ !player.isMyTurn }
                         attachCombination={ (combinationToAttach: Combination) => handleAttachCombination(combinationToAttach) }
                         unsetCombination={ () => setCombination(new Combination([])) }
-                        onDraggedCombination={ handleOnDraggedCombination }></Combinations>
+                        onDraggedCombination={ (comb: Combination) => draggedCombination.current = comb.copyCombination() }></Combinations>
           <span className={ styles.deckContainer }>
             <Deck socket={ socket } playerId={ player.id } getCardFromDeck={ handleGetCardFromDeck } readOnly={ !player.isMyTurn || hasThowCards }></Deck>
           </span>
