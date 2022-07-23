@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { Player } from '../game-handlerer/class/game-handler';
+import { MoveHistory } from './class/dashboard';
 import { CCard } from './components/card/class/Card';
 import { Combination } from './components/combinations/class/Combinations';
 import { Combinations } from './components/combinations/Combinations';
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers, setPlayer, reStart }: Props) => {
+  const moveHistory = useRef(new MoveHistory([], player.cards));
   const [combination, setCombination] = useState<Combination>(new Combination([]));
   const [combinations, setCombinations] = useState<Combination[]>([]);
   const [, updateState] = useState<{}>();
@@ -90,14 +92,16 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
     comb.cards = Combination.orderCards(comb.cards);
     comb.id = Combination.generateId(combinations);
     comb.cards.forEach((card: CCard) => card.selected = false);
-    const newCombinations = combinations.concat([comb.copyCombination()]);
+    let newCombinations = combinations.concat([comb.copyCombination()]);
     newCombinations.forEach((_comb: Combination) => _comb.cards = _comb.cards.filter((card: CCard) => !card.selected));
-    socket.emit('setCombinations', newCombinations.filter((_comb: Combination) => _comb.cards.length));
+    newCombinations = newCombinations.filter((_comb: Combination) => _comb.cards.length);
+    socket.emit('setCombinations', newCombinations);
     player.cards = (player.cards.filter((card: CCard) => !card.selected));
-    cardsUpdated.current = [...player.cards];
+    cardsUpdated.current = player.cards.map((card: CCard) => card);
     comb.cards.forEach((card: CCard) => card.selected = false);
     setCombination(new Combination([]));
     draggedCombination.current = undefined;
+    moveHistory.current.addMove(newCombinations, cardsUpdated.current);
   }
 
   const handleAttachCombination = (combinationToModify: Combination): void => {
@@ -112,16 +116,18 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
         comb.cards = comb.cards.filter((card: CCard) => !card.selected);
       }
     });
-    socket.emit('setCombinations', combinations.filter((comb: Combination) => comb.cards.length))
+    const newCombinations = combinations.filter((comb: Combination) => comb.cards.length)
+    socket.emit('setCombinations', newCombinations)
     cardsUpdated.current = (player.cards.filter((card: CCard) => !card.selected));
-    player.cards = [...cardsUpdated.current];
+    player.cards = cardsUpdated.current.map((card: CCard) => card);
     setCombination(new Combination([]));
     setHasThowCards(true);
+    moveHistory.current.addMove(newCombinations, cardsUpdated.current);
   }
 
   const handleOrderCard = (): void => {
     cardsUpdated.current.sort((prev: CCard, next: CCard) => prev.number > next.number ? 1 : -1);
-    player.cards = [...cardsUpdated.current];
+    player.cards = cardsUpdated.current.map((card: CCard) => card);
     socket.emit('upgradeCards', player);
     forceUpdate();
   }
@@ -142,15 +148,17 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
       return;
     }
     setHasThowCards(false);
-    player.cards = [...cardsUpdated.current];
+    player.cards = cardsUpdated.current.map((card: CCard) => card);
     socket.emit('setNextPlayer', player);
+    moveHistory.current = new MoveHistory(combinations, cardsUpdated.current);
   }
 
   const handleGetCardFromDeck = (card: CCard): void => {
     setHasThowCards(false);
-    cardsUpdated.current.push({ ...card });
-    player.cards = [...cardsUpdated.current];
+    cardsUpdated.current.push(new CCard(card.id, card.number, card.seed, card.selected));
+    player.cards = cardsUpdated.current.map((card: CCard) => card);
     socket.emit('setNextPlayer', player);
+    moveHistory.current = new MoveHistory(combinations, cardsUpdated.current);
   }
 
   const handleSetCards = (from: number, to: number): void => {
@@ -162,7 +170,7 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
     const cardToMove = new CCard(card.id, card.number, card.seed, card.selected);
     cardsUpdated.current.splice(from, 1);
     cardsUpdated.current.splice(to, 0, cardToMove);
-    player.cards = [...cardsUpdated.current];
+    player.cards = cardsUpdated.current.map((card: CCard) => card);
     forceUpdate();
   }
 
@@ -174,9 +182,32 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
     };
   }
 
+  const handleUndo = (event: any) => {
+    if (event.ctrlKey && event.key === "z") {
+      const prevMove = moveHistory.current.undoMove();
+      if(prevMove) {
+        prevMove.combinations.forEach((combination: Combination) => {
+          combination.cards = combination.cards.map((card: CCard) => {
+            card.selected = false;
+            return card;
+          })
+        }) 
+        setCombinations(prevMove.combinations);
+        socket.emit('setCombinations', prevMove.combinations);
+        if(prevMove.cards) {
+          cardsUpdated.current = prevMove.cards.map((card: CCard) => {
+            card.selected = false;
+            return card;
+          });
+          player.cards = cardsUpdated.current.map((card: CCard) => card);
+        }
+      }
+    }
+  };
+
   return (
     <>
-      <div className={ styles.dashboard }>
+      <div onKeyDown={ handleUndo } tabIndex= { 0 } className={ styles.dashboard }>
         <div className={ styles.dashboardHeader }>
           { players.map((_player: Player, index: number) => <span style={ getIsMyTurnStyle(_player) } key={index}>{_player.name}</span>) }
         </div>
