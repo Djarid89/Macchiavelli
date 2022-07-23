@@ -64,7 +64,7 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
   }
 
   const handleThrowDown = (e?: any): void => {
-    if(e.altKey) {
+    if(e.altKey || !player.isMyTurn) {
       return;
     }
 
