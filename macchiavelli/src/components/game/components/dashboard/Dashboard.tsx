@@ -88,7 +88,7 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
       setHasThowCards(true);
     }
     comb.cards = Combination.orderCards(comb.cards);
-    comb.id = combinations.length + 1;
+    comb.id = Combination.generateId(combinations);
     comb.cards.forEach((card: CCard) => card.selected = false);
     const newCombinations = combinations.concat([comb.copyCombination()]);
     newCombinations.forEach((_comb: Combination) => _comb.cards = _comb.cards.filter((card: CCard) => !card.selected));
@@ -166,11 +166,19 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
     forceUpdate();
   }
 
+  const getIsMyTurnStyle = (_player: Player): any => {
+    return {
+      fontWeight: _player.isMyTurn ? 'bold' : '',
+      backgroundColor: _player.isMyTurn ? 'green' : '#efefef',
+      color: _player.isMyTurn ? 'white' : 'black'
+    };
+  }
+
   return (
     <>
       <div className={ styles.dashboard }>
         <div className={ styles.dashboardHeader }>
-          { players.map((_player: Player, index: number) => <span style={{ fontWeight: _player.isMyTurn ? 'bold' : '' }} key={index}>{_player.name}</span>) }
+          { players.map((_player: Player, index: number) => <span style={ getIsMyTurnStyle(_player) } key={index}>{_player.name}</span>) }
         </div>
         <div className={ styles.dashboardContainer } onDrop={ (e: any) => handleThrowDown(e) } onDragOver={ handleDroppable } onDragEnter={ handleDroppable }>
           <Combinations combinations={ combinations }

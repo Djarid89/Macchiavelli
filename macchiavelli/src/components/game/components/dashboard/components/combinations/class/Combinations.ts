@@ -17,6 +17,18 @@ export class Combination {
     this.isDragged = false;
   }
 
+  static generateId(combinations: Combination[]): number {
+    let validId = false;
+    let random = Math.floor(Math.random() * 100000) + 1;
+    while(!validId) {
+      random = Math.floor(Math.random() * 100000) + 1;
+      if(combinations.every((combination: Combination) => combination.id !== random)) {
+        validId = true;
+      }
+    }
+    return random;
+  }
+
   copyCombination(): Combination {
     const newCombination = new Combination(this.cards.map((card: CCard) => card));
     newCombination.id = this.id;
