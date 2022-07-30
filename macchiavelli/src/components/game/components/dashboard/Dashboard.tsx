@@ -216,7 +216,7 @@ export const DashBoard: React.FC<Props> = ({ socket, players, player, setPlayers
     <>
       <div onKeyDown={ handleUndo } tabIndex= { 0 } className={ styles.dashboard }>
         <div className={ styles.dashboardHeader }>
-          { players.map((_player: Player, index: number) => <span style={ getIsMyTurnStyle(_player) } key={index}>{_player.name}</span>) }
+          { players.map((_player: Player, index: number) => <span style={ getIsMyTurnStyle(_player) } key={index}>{_player.name} ({_player.cards.length})</span>) }
         </div>
         <div className={ styles.dashboardContainer } onDrop={ (e: any) => handleThrowDown(e) } onDragOver={ handleDroppable } onDragEnter={ handleDroppable }>
           <Combinations combinations={ combinations }
