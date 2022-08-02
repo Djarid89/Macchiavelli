@@ -6,7 +6,6 @@ import { GameHandlerer } from './components/game-handlerer/GameHandlerer';
 import styles from './Game.module.scss';
 
 let socket = io('https://macchiavelli-card-game.herokuapp.com');
-socket.emit('initGame')
 export const Game: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [player, setPlayer] = useState<Player>();
