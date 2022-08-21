@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { DashBoard } from './components/dashboard/Dashboard';
 import { Player } from './components/game-handlerer/class/game-handler';
@@ -9,6 +9,10 @@ let socket = io('https://macchiavelli-card-game.herokuapp.com');
 export const Game: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [player, setPlayer] = useState<Player>();
+
+  useEffect(() => {
+    socket.emit('initGame');
+  }, []);
 
   socket.on('setInitGame', () => {
     setPlayers([]);
