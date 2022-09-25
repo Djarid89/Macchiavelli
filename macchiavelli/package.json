@@ -43,6 +43,7 @@
     ]
   },
   "devDependencies": {
+    "@types/socket.io": "^3.0.2",
     "@types/webpack-env": "^1.17.0",
     "sass": "^1.53.0"
   }

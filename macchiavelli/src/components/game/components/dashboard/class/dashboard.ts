@@ -5,14 +5,15 @@ import { IMove } from "../interfaces/dashboard";
 export class MoveHistory {
   moves: IMove[];
 
-  constructor(combinations: Combination[], cards: CCard[]) {
-    this.moves = [{ combinations, cards }];
+  constructor(combinations: Combination[], cards: CCard[], hasThowCards: boolean) {
+    this.moves = [{ combinations, cards, hasThowCards }];
   }
 
-  addMove(combinations: Combination[], cards: CCard[]): void {
+  addMove(combinations: Combination[], cards: CCard[], hasThowCards: boolean): void {
     this.moves.push({
       combinations: combinations.map((combination: Combination) => combination),
-      cards: cards.map((card: CCard) => card)
+      cards: cards.map((card: CCard) => card),
+      hasThowCards: hasThowCards
     });
   }
 
